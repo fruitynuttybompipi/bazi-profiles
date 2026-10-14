@@ -7,9 +7,18 @@ This repo holds **code only**. It contains no personal data. Profiles live in a 
 ## Put the app on GitHub Pages
 
 1. Create a repo for the code, for example `bazi-profiles`. Free GitHub Pages needs it to be public; that is fine, because no profiles are stored here.
-2. Upload `index.html` (and this README and the licence file) to the repo root.
+2. Upload these files to the repo root: `index.html`, `sw.js`, `manifest.webmanifest`, the four icon PNGs (`icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`), this README, the licence file and `BaZi-Profiles-Guide.pdf`. Keep the source in a `src/` folder if you like; Pages ignores it.
 3. Repo **Settings → Pages → Build and deployment**: Source **Deploy from a branch**, Branch **main**, folder **/ (root)**. Save.
 4. After a minute the app is at `https://<your-username>.github.io/bazi-profiles/`.
+
+## Install it like an app
+
+Open the Pages address on your phone, then:
+
+- **iPhone / iPad (Safari):** Share → **Add to Home Screen**.
+- **Android (Chrome):** ⋮ menu → **Install app**, or use the **Install app** button in Settings.
+
+The installed app opens full screen and works offline. GitHub sync catches up when you are back online. After you upload a new `index.html`, the app picks it up the next time it opens online.
 
 ## Sync your profiles across devices
 
