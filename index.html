@@ -338,6 +338,16 @@ table.grid tr[data-pair]:hover td { background: var(--accent-soft); }
 .acct { width: 100%; font-size: .84rem; }
 .acct td, .acct th { white-space: normal; }
 .big2 { font-family: var(--display); font-size: 1.8rem; font-weight: 600; line-height: 1; }
+/* chart details: one small card per pillar, no sideways scrolling */
+.card > *, .card details, .card details > * { min-width: 0; max-width: 100%; }
+.dgrid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.dcard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; background: var(--bg); min-width: 0; }
+.dh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.dh .dz { font-size: 1.15rem; font-weight: 600; }
+.dr { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 8px; font-size: .86rem; align-items: start; }
+.dr .dk { color: var(--muted); font-size: .78rem; font-weight: 600; }
+.dr .dv { overflow-wrap: anywhere; }
+.dl { display: block; }
 /* life stages */
 .stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .stg { border-radius: 9px; background: var(--bg); padding: 7px 4px; text-align: center; display: grid; gap: 1px; }
@@ -574,7 +584,7 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
       <div id="cellInfo" class="info" hidden></div>
       <details>
         <summary>Hidden stems 藏干, ten gods 十神 and branch roles</summary>
-        <div class="scroll"><table id="detail"></table></div>
+        <div class="dgrid" id="detail"></div>
         <p class="muted small">Root 通根 means the branch holds your own element, which strengthens you. Nayin 纳音 is the traditional "sound element" of each pillar, a symbolic texture rather than a strength measure.</p>
         <p class="small" id="fetal"></p>
       </details>
@@ -11239,8 +11249,18 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
     $('stages').innerHTML = ['year', 'month', 'day', 'hour'].map((pal, i) => { const x = c.pillars[i]; if (!x) return `<div class="stg"><small>${PALACE[pal][0]}</small><span class="zh">?</span><small>unknown</small></div>`; const L = RL.lifeStage(c.dayMaster, x.branch); return `<div class="stg ${L.strong ? 'up' : L.weak ? 'down' : ''}" title="${L.note}"><small>${PALACE[pal][0]} · ${E.BRANCHES[x.branch].zh}</small><span class="zh">${L.zh}</span><small>${L.name}</small></div>`; }).join('');
     const fo = XT.fetalOrigin(c);
     $('fetal').innerHTML = `<b>Fetal origin 胎元:</b> <span class="zh">${fo.zh}</span> ${fo.label} · ${fo.nayin.name} <span class="zh">${fo.nayin.zh}</span>. Worked out from the month pillar; some schools read it as inborn temperament.`;
-    $('detail').innerHTML = '<thead><tr><th>Pillar</th><th>Stem · god</th><th>Hidden stems · god</th><th>Branch to you</th><th>Nayin 纳音</th></tr></thead><tbody>' +
-      c.pillars.map(x => x ? `<tr><td>${PALACE[x.palace][0]} <span class="zh">${PALACE[x.palace][2]}</span></td><td>${sz(x.stem)} · ${god(x.stemGod)}</td><td>${x.hidden.map(h => `${sz(h.stem)} · ${god(h.god)}`).join('<br>')}</td><td>${rel[x.palace].role} <span class="zh">${ROLE_ZH[rel[x.palace].role]}</span>${rel[x.palace].root ? `<br>${rel[x.palace].root} <span class="zh">通根</span>` : ''}</td><td>${(n => `<span class="zh">${n.zh}</span><br>${n.name}`)(XT.nayin(x.stem, x.branch))}</td></tr>` : `<tr><td>Hour <span class="zh">时柱</span></td><td colspan="4" class="muted">unknown</td></tr>`).join('') + '</tbody>';
+    const row = (k, v) => `<div class="dr"><span class="dk">${k}</span><span class="dv">${v}</span></div>`;
+    $('detail').innerHTML = c.pillars.map((x, i) => {
+      const pal = ['year', 'month', 'day', 'hour'][i];
+      const head = `<div class="dh"><b>${PALACE[pal][0]} <span class="zh">${PALACE[pal][2]}</span></b>${x ? `<span class="zh dz">${x.zh}</span>` : ''}</div>`;
+      if (!x) return `<div class="dcard">${head}<p class="muted small">Birth time unknown.</p></div>`;
+      const n = XT.nayin(x.stem, x.branch), rl = rel[x.palace];
+      return `<div class="dcard">${head}
+        ${row('Stem', `${sz(x.stem)} · ${god(x.stemGod)}`)}
+        ${row('Hidden 藏干', x.hidden.map(h => `<span class="dl">${sz(h.stem)} · ${god(h.god)}</span>`).join(''))}
+        ${row('Branch to you', `${rl.role} <span class="zh">${ROLE_ZH[rl.role]}</span>${rl.root ? ` · ${rl.root} <span class="zh">通根</span>` : ''}`)}
+        ${row('Nayin 纳音', `<span class="zh">${n.zh}</span> ${n.name}`)}</div>`;
+    }).join('');
 
     const S = r.strength;
     $('verdict').innerHTML = `<b>${S.verdict}</b><span class="zh">${S.zh}</span><span class="muted small">${[S.deLing, S.deDi, S.deShi].filter(Boolean).length} of 3 classic signs of strength</span>`;
