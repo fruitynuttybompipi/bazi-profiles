@@ -536,6 +536,8 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
 .swcol p { margin: 6px 0 0; }
 .gtip { font-size: .88rem; background: var(--warn-soft); color: var(--ink, inherit); border-radius: 8px; padding: 6px 8px; margin-top: 4px; }
 .gtip b { color: var(--warn); }
+.gwhen { font-size: .85rem; display: flex; gap: 6px; align-items: flex-start; color: var(--accent); }
+.gwhen .ic { width: 14px; height: 14px; flex: none; margin-top: 2px; }
 .gtech { font-size: .8rem; color: var(--muted, #777); }
 .gall { margin: 6px 0 4px; color: var(--muted, #777); font-size: .85rem; text-transform: none; }
 .ggrp { margin-top: 12px; }
@@ -695,7 +697,7 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
 
     <section class="card" aria-labelledby="iH">
       <header><h2 id="iH"><svg class="ic" aria-hidden="true"><use href="#i-link"></use></svg>Interactions in the chart <span class="zh">刑冲合害</span></h2></header>
-      <p class="muted small">Green lines are harmonies, red lines are tensions.</p>
+      <p class="muted small">Green lines are harmonies, red lines are tensions. Each one links two parts of your life: year = family and social life, month = career, day = you and your relationship, hour = children and later life.</p>
       <ul class="reasons" id="inter"></ul>
     </section>
 
@@ -9990,13 +9992,85 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
     }));
     return out;
   }
-  function describeInteraction(x, positions) {
+  // ---- plain-language layer for interactions (own wording) ----
+  const PAIR_TXT = {
+    'year-month': ['Your family background helps your career: upbringing, family contacts or your early environment give you a head start.', 'Your path pulls away from what your family expected: leaving home early, changing direction, or family duties competing with work.'],
+    'year-day': ['You stay close to your family and wider circle, and family tends to welcome your partner.', 'There is distance or friction between you (or your partner) and the wider family or in-laws.'],
+    'year-hour': ['Family ways carry on through you: what you inherit tends to pass on to the next generation.', 'Your later life looks quite different from your upbringing; long-term plans can clash with family duties.'],
+    'month-day': ['Work and personal life fit together: you may meet a partner through work, or your partner helps your career.', 'Work and home compete for your time: a job change can shake the relationship, or the relationship can change your work.'],
+    'month-hour': ['Your career feeds your own projects: what you build at work carries on into later life.', 'Career and personal projects pull against each other; expect a change of direction somewhere in mid-life.'],
+    'day-hour': ['A warm bond with children and your own projects; later life tends to feel settled.', 'Some friction or distance with children, or restlessness about your own plans: you may start over more than once.'],
+  };
+  const FLAVOUR = {
+    selfpunish: '',
+    combo: 'The tie is strong: it supports you, but can also make it hard to separate these two parts of life.',
+    half: 'They work as a team, quietly building in the same direction.',
+    triple: '', season: '',
+    clash: 'Expect real changes and movement here, not just tension.',
+    harm: 'It shows as quiet hurt and things left unsaid rather than open fights.',
+    punish: 'It shows as pressure, high standards or strict situations.',
+    destroy: 'It shows as small breakages: plans or agreements that need mending.',
+    stemcombo: 'This bond is visible: people around you can see it in how you act.',
+    stemclash: 'This is visible: it shows in how you talk and act, not only in circumstances.',
+    hidden: 'The bond is quiet and works behind the scenes.',
+  };
+  const TIP = {
+    clash: 'Plan changes in these areas rather than letting them happen to you, and avoid big decisions there when you are upset.',
+    harm: 'Say small things early before they turn into resentment.',
+    punish: 'Lower the bar a little for yourself and others in these areas.',
+    selfpunish: 'Notice when you replay the same worry; write it down and move on.',
+    destroy: 'Double-check agreements and keep small promises.',
+    stemclash: 'Choose your words carefully when you disagree; the friction is about style as much as substance.',
+  };
+  const ORDER = ['year', 'month', 'day', 'hour', 'luck', 'annual'];
+  const SHORT = { year: 'family circle', month: 'career', day: 'relationship', hour: 'children and later life', luck: 'this decade', annual: 'this year' };
+  const listTxt = a => a.length < 2 ? a.join('') : a.length === 2 && a.some(t => / and /.test(t)) ? `${a[0]}, and ${a[1]}` : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+  const orTxt = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' or ' + a[a.length - 1];
+  const yrTxt = (Y, now) => Y === now ? `${Y}, this year` : `${Y}`;
+  const yearsWith = (branches, from, n = 2) => { const out = []; for (let Y = from; out.length < n && Y < from + 24; Y++) if (branches.includes(((Y - 4) % 12 + 12) % 12)) out.push(Y); return out; };
+  function plainInteraction(x, positions, ctx = {}) {
+    const good = x.tone === 'good';
+    const q = p => positions.find(z => z && z.p === p);
+    const pals = x.between.slice().sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+    let plain, tip = TIP[x.kind] || '';
+    if (x.kind === 'selfpunish') {
+      plain = `The same branch appears twice, so you tend to be hard on yourself about ${listTxt([...new Set(pals.map(p => SHORT[p]))])}, and can replay the same worries.`;
+    } else if (x.kind === 'arch') {
+      const nx = yearsWith([x.toward], ctx.year || 2026, 1)[0];
+      plain = `A hidden pull links ${listTxt(pals.map(p => SHORT[p]))}. It is waiting for ${B[x.toward].zh} (${B[x.toward].animal}) to complete it, so it shows up most in ${B[x.toward].animal} years${nx ? ` (next: ${yrTxt(nx, ctx.year)})` : ''} or a ${B[x.toward].animal} luck pillar.`;
+      tip = '';
+    } else if (pals.length >= 3) {
+      plain = good ? `Three parts of your life (${listTxt(pals.map(p => SHORT[p]))}) work as one team.` : `Pressure links three parts of your life: ${listTxt(pals.map(p => SHORT[p]))}.`;
+      if (FLAVOUR[x.kind]) plain += ' ' + FLAVOUR[x.kind];
+    } else {
+      const pt = PAIR_TXT[pals.join('-')], mild = ['harm', 'punish', 'destroy'].includes(x.kind);
+      if (mild) { const a = SHORT[pals[0]], b = SHORT[pals[1]], ab = listTxt([a, b]); plain = { harm: `Quiet friction between ${ab}: hurt feelings and things left unsaid rather than open fights.`, punish: `Pressure between ${ab}: high standards, strict situations, or being hard on yourself about them.`, destroy: `Small breakages between ${ab}: plans or agreements here need mending more often than usual.` }[x.kind]; }
+      else { plain = pt ? pt[good ? 0 : 1] : `${SHORT[pals[0]]} and ${SHORT[pals[1]]} are ${good ? 'linked' : 'at odds'}.`; if (FLAVOUR[x.kind]) plain += ' ' + FLAVOUR[x.kind]; }
+    }
+    // what the bond builds, judged against this chart's helpful elements
+    if (x.el !== undefined && ctx.str && x.kind !== 'arch') {
+      const st = ctx.str;
+      if (st.usefulEls.has(x.el)) plain += ` It builds ${elTxt(x.el)}, one of your helpful elements, so it works in your favour.`;
+      else if (st.unfavEls.has(x.el)) plain += ` It builds ${elTxt(x.el)}, which you already have enough of, so the bond adds to an imbalance rather than fixing it.`;
+    }
+    // when it is most noticeable: years that repeat one of the branches involved
+    let when = '';
+    if (x.part === 'branch' && x.kind !== 'arch' && ctx.year) {
+      const brs = [...new Set(pals.map(p => q(p).branch))];
+      const ys = yearsWith(brs, ctx.year, 2);
+      if (ys.length) when = `Most noticeable in ${orTxt(brs.map(b => `${B[b].animal} ${B[b].zh}`))} years (next: ${ys.map(Y => yrTxt(Y, ctx.year)).join('; ')}), and during a 10-year luck pillar with that branch.`;
+    }
+    return { plain, tip: good ? '' : tip, when };
+  }
+  function describeInteraction(x, positions, ctx) {
     const name = p => PAL[p].name;
     const what = x.between.map(p => { const q = positions.find(z => z && z.p === p); return x.part === 'stem' ? S[q.stem].zh : B[q.branch].zh; }).join(' ');
     const where = x.between.length === 2 ? `your ${name(x.between[0])} and ${name(x.between[1])} pillars` : `your ${x.between.map(name).join(', ')} pillars`;
     const lives = [...new Set(x.between.map(p => PAL[p].life))].join(' / ');
     const el = x.el !== undefined ? ` It leans towards ${elTxt(x.el)}.` : '';
-    return { title: `${x.name} ${x.zh}: ${what}`, text: `Between ${where}: ${x.meaning}. Areas: ${lives}.${el}`, tone: x.tone, why: x.between.map(p => ({ p, part: x.part })), basis: 'standard', kind: x.kind };
+    const out = { title: `${x.name} ${x.zh}: ${what}`, text: `Between ${where}: ${x.meaning}. Areas: ${lives}.${el}`, tone: x.tone, why: x.between.map(p => ({ p, part: x.part })), basis: 'standard', kind: x.kind };
+    if (ctx) Object.assign(out, plainInteraction(x, positions, ctx));
+    return out;
   }
 
   // ---------------- strength: plain-language tables (own wording) ----------------
@@ -10195,28 +10269,70 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
     });
     return R;
   }
+  const LIFE_THEME = {
+    Peer: () => 'friends, teamwork and competition; money tends to go out through sharing and spending',
+    Output: f => `creativity, speaking up and showing your skills${f ? '; also children' : ''}`,
+    Wealth: f => `money, deals and getting results${f ? '' : '; for a man, also romance'}`,
+    Officer: f => `career, responsibility and recognition, with more pressure from rules and bosses${f ? '; for a woman, also romance' : ''}`,
+    Resource: () => 'learning, help from others, documents and property, and rest',
+  };
+  const RATING_TXT = {
+    supportive: 'Overall supportive 顺: it brings elements your chart needs, so effort tends to pay off. A good time to start things and push forward.',
+    mixed: 'Overall mixed 平: some help, some strain. Results depend more on your choices than on timing.',
+    challenging: 'Overall challenging 逆: it brings more of what your chart already has plenty of, so things take extra effort. Better for steady work, saving and finishing things than for big new risks.',
+  };
+  const ACT = {
+    year: ['help from family and your wider circle; good for social life and networking', 'unsettled circumstances, family matters or a change of environment'],
+    month: ['support at work, such as a new role, helpful colleagues or a boss who backs you', 'changes at work, a new role, or tension with colleagues or parents'],
+    day: ['closeness, a new relationship or a deeper commitment', 'changes or friction at home and in your relationship; a common time to move house'],
+    hour: ['progress with your own projects, or good news about children', 'plans and projects need re-working; matters with children need attention'],
+  };
+  const VERB_NOW = { clash: 'clashes with', harm: 'quietly rubs against', punish: 'puts pressure on', destroy: 'chips away at', stemclash: 'clashes with' };
   function currentPeriod(chart, str, now) {
-    const R = [], dm = chart.dayMaster;
+    const R = [], dm = chart.dayMaster, female = chart.input.gender === 'F';
     const dateStr = now.toISOString().slice(0, 10), y = now.getFullYear();
     const luck = E.currentLuck(chart, dateStr);
     const annual = E.annualPillar(y);
     const rate = p => { const els = [S[p.stem].el, B[p.branch].el]; const u = els.filter(e => str.usefulEls.has(e)).length, b = els.filter(e => str.unfavEls.has(e)).length; return u > b ? 'supportive' : b > u ? 'challenging' : 'mixed'; };
     const zhRate = { supportive: '顺', mixed: '平', challenging: '逆' };
+    const theme = g => LIFE_THEME[GROUP_OF[g]](female);
     const describe = (p, label, key) => {
       const sg = E.tenGod(dm, p.stem), bg = E.tenGod(dm, B[p.branch].hidden[0]);
       const r = rate(p);
-      return { text: `${label}: ${S[p.stem].zh}${B[p.branch].zh} ${S[p.stem].py} ${B[p.branch].py}, bringing ${godTxt(sg)} on top and ${godTxt(bg)} below. ${S[p.stem].el === B[p.branch].el ? `Both halves are ${elTxt(S[p.stem].el)}` : `Its elements are ${elTxt(S[p.stem].el)} and ${elTxt(B[p.branch].el)}`}, which makes it ${r} (${zhRate[r]}) for you.`, why: [{ p: key, part: 'both' }], basis: 'standard', rating: r };
+      return { sg, bg, text: `${label}: ${S[p.stem].zh}${B[p.branch].zh} ${S[p.stem].py} ${B[p.branch].py}, bringing ${godTxt(sg)} on top and ${godTxt(bg)} below. ${S[p.stem].el === B[p.branch].el ? `Both halves are ${elTxt(S[p.stem].el)}` : `Its elements are ${elTxt(S[p.stem].el)} and ${elTxt(B[p.branch].el)}`}, which makes it ${r} (${zhRate[r]}) for you.`, why: [{ p: key, part: 'both' }], basis: 'standard', rating: r };
     };
     let luckRating = null;
-    if (luck) { const d = describe(luck, 'Your 10-year luck pillar 大运', 'luck'); luckRating = d.rating; R.push(d); }
-    else R.push({ text: `Your first 10-year luck pillar starts on ${chart.luck.startDate}; until then the natal chart and yearly pillars set the tone.`, why: [{ p: 'month', part: 'both' }], basis: 'standard' });
-    const ad = describe(annual, `This year ${y} 流年`, 'annual'); R.push(ad);
+    if (luck) {
+      const d = describe(luck, 'Your 10-year luck pillar 大运', 'luck'); luckRating = d.rating;
+      const y0 = +luck.from.slice(0, 4), a0 = Math.floor(luck.ageFrom), mid = y0 + 5;
+      const same = GROUP_OF[d.sg] === GROUP_OF[d.bg];
+      d.plain = `Your 10-year luck 大运 runs ${y0}–${y0 + 10} (about ages ${a0}–${a0 + 10}). ` +
+        (same ? `The whole decade is about ${theme(d.sg)}. ` : `${y0}–${mid} leans towards ${theme(d.sg)}. From about ${mid} the focus shifts to ${theme(d.bg)}. `) + RATING_TXT[d.rating];
+      const idx = (chart.luck.pillars || []).findIndex(q => q.from === luck.from), nx = idx >= 0 ? chart.luck.pillars[idx + 1] : null;
+      if (nx) d.plain += ` Next decade, from ${nx.from.slice(0, 4)} (age ${Math.floor(nx.ageFrom)}): ${nx.zh}, which looks ${rate(nx)}.`;
+      R.push(d);
+    } else R.push({ text: `Your first 10-year luck pillar starts on ${chart.luck.startDate}; until then the natal chart and yearly pillars set the tone.`, plain: `Your 10-year luck pillars have not started yet: the first one begins on ${chart.luck.startDate}. Until then, the birth chart and each year's energy set the tone.`, why: [{ p: 'month', part: 'both' }], basis: 'standard' });
+    const ad = describe(annual, `This year ${y} 流年`, 'annual');
+    const ny = E.annualPillar(y + 1);
+    ad.plain = `${y} (${S[annual.stem].zh}${B[annual.branch].zh}) ` + (GROUP_OF[ad.sg] === GROUP_OF[ad.bg] ? `is about ${theme(ad.sg)}. ` : `brings ${theme(ad.sg)} on the surface, and ${theme(ad.bg)} underneath. `) + RATING_TXT[ad.rating] + ` Next year ${y + 1} (${S[ny.stem].zh}${B[ny.branch].zh}) looks ${rate(ny)}.`;
+    R.push(ad);
     const positions = chart.pillars.map(p => p && { p: p.palace, stem: p.stem, branch: p.branch });
     if (luck) positions.push({ p: 'luck', stem: luck.stem, branch: luck.branch });
     positions.push({ p: 'annual', stem: annual.stem, branch: annual.branch });
-    if (annual.branch === chart.pillars[0].branch) R.push({ text: `This is your own animal year (本命年): the year's branch repeats your year branch, a year when people traditionally take extra care with big moves.`, why: [{ p: 'annual', part: 'branch' }, { p: 'year', part: 'branch' }], basis: 'standard' });
+    if (annual.branch === chart.pillars[0].branch) R.push({ text: `This is your own animal year (本命年): the year's branch repeats your year branch, a year when people traditionally take extra care with big moves.`, plain: `This is your own animal year 本命年 (${B[annual.branch].animal}). Traditionally it is an unsettled year: people take extra care with big moves, contracts and health, and wear red for luck.`, tip: 'Prepare big decisions carefully rather than rushing them this year.', why: [{ p: 'annual', part: 'branch' }, { p: 'year', part: 'branch' }], basis: 'standard' });
     const xs = findInteractions(positions, ['luck', 'annual']).filter(x => x.part === 'branch' && !(x.between.includes('luck') && x.between.includes('annual') && x.between.length === 2));
-    xs.slice(0, 5).forEach(x => { const d = describeInteraction(x, positions); R.push({ text: `${d.title}. ${d.text}`, why: d.why, basis: 'standard', tone: d.tone }); });
+    xs.slice(0, 5).forEach(x => {
+      const d = describeInteraction(x, positions);
+      const natal = x.between.filter(p => ACT[p]).sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)), good = x.tone === 'good';
+      const src = x.between.includes('annual') ? `This year (${B[annual.branch].zh})` : `This decade (${B[luck.branch].zh})`;
+      let plain;
+      if (x.kind === 'selfpunish') plain = `${src} repeats a branch from your ${listTxt(natal.map(p => SHORT[p]))} side of the chart, so old worries there can come back. Be kind to yourself.`;
+      else if (good) plain = `${src} links up with your ${listTxt(natal.map(p => SHORT[p]))}: ${natal.map(p => ACT[p][0]).join('; ')}.`;
+      else plain = `${src} ${VERB_NOW[x.kind] || 'presses on'} your ${listTxt(natal.map(p => SHORT[p]))}` + (x.kind === 'clash' ? `: ${natal.map(p => ACT[p][1]).join('; ')}.` : `. Milder than a clash, so expect small versions of: ${natal.map(p => ACT[p][1]).join('; ')}.`);
+      if (!natal.length) plain = d.text;
+      if (x.el !== undefined && good) { if (str.usefulEls.has(x.el)) plain += ` It also builds ${elTxt(x.el)}, which helps you.`; else if (str.unfavEls.has(x.el)) plain += ` It builds ${elTxt(x.el)} though, which you have enough of, so take the good with some caution.`; }
+      R.push({ text: `${d.title}. ${d.text}`, plain, tip: good ? '' : (TIP[x.kind] || ''), why: d.why, basis: 'standard', tone: d.tone });
+    });
     return { reasons: R, luck, annual, luckRating, annualRating: ad.rating };
   }
 
@@ -10281,7 +10397,7 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
     const gw = godWeights(chart);
     const positions = chart.pillars.map(p => p && { p: p.palace, stem: p.stem, branch: p.branch });
     const natalX = findInteractions(positions);
-    const interactions = natalX.map(x => describeInteraction(x, positions));
+    const interactions = natalX.map(x => describeInteraction(x, positions, { str, year: now.getFullYear() }));
     const cur = currentPeriod(chart, str, now);
     const cards = [
       { id: 'personality', title: 'Personality', zh: '性格', reasons: personality(chart, str, gw) },
@@ -11594,7 +11710,8 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
       ? `<span class="basis own" title="My own weighting or threshold. Less certain; treat as a guide.">${icon('scale')}My weighting</span>`
       : `<span class="basis std" title="A mainstream classical BaZi rule.">${icon('check')}Standard rule</span>`;
     if (r.caveat) return `<li class="caveat">${esc(r.text)}</li>`;
-    return `<li class="${tone}"><div class="rline">${r.title ? `<b>${esc(r.title)}.</b> ` : ''}${ok}${esc(r.text)}</div>
+    const body = r.plain ? `${esc(r.plain)}</div>${r.tip ? `<div class="gtip"><b>Try:</b> ${esc(r.tip)}</div>` : ''}${r.when ? `<div class="gwhen">${icon('clock')}${esc(r.when)}</div>` : ''}<div class="gtech">${esc(r.text)}</div>` : `${esc(r.text)}</div>`;
+    return `<li class="${tone}"><div class="rline">${r.title ? `<b>${esc(r.title)}.</b> ` : ''}${ok}${body}
       <div class="meta">${pts}${r.why.length ? `<button class="why" type="button" data-why="${id}" aria-expanded="false">${icon('eye')}Why</button>` : ''}${basis}</div>
       <div class="whybox" id="${id}" hidden></div></li>`;
   }
@@ -12104,7 +12221,7 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
   function renderReport() {
     const p = byId(view.id); if (!p) return go('list');
     const { chart: c, reading: r } = chartOf(p), dm = E.STEMS[c.dayMaster], nowY = new Date().getFullYear();
-    const first = card => card.reasons.filter(x => !x.caveat).slice(0, 2).map(x => `<li>${esc(x.text)}</li>`).join('');
+    const first = card => card.reasons.filter(x => !x.caveat).slice(0, 2).map(x => `<li>${esc(x.plain || x.text)}</li>`).join('');
     const yrs = [0, 1, 2].map(k => TM.yearView(c, r, nowY + k));
     const pill = c.pillars.map((x, i) => `<div>${x ? x.zh : '??'}<small>${['Year', 'Month', 'Day', 'Hour'][i]}</small></div>`).join('');
     $('reportBody').innerHTML = `<header><div><h2 style="font-size:1.4rem">${esc(p.nick)} <span class="zh">八字</span></h2>
