@@ -543,7 +543,12 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
 .rhead { display: block; font-weight: 700; line-height: 1.35; }
 .rbody { display: block; margin-top: 2px; line-height: 1.5; }
 .rsub { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 3px; line-height: 1.5; }
-.eltag { font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
+.eltag { font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 99px; white-space: nowrap; }
+/* element bars: label on its own line so the role and pill never wrap */
+#bars .bar { grid-template-columns: minmax(0, 1fr) 42px; row-gap: 4px; }
+#bars .bar > span:first-child { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+#bars .bar > span:first-child small { white-space: nowrap; }
+#bars .bar > b { text-align: right; }
 .eltag.g { background: var(--good-soft); color: var(--good); } .eltag.b { background: var(--bad-soft); color: var(--bad); }
 .gwhen { font-size: .85rem; display: flex; gap: 6px; align-items: flex-start; color: var(--accent); }
 .gwhen .ic { width: 14px; height: 14px; flex: none; margin-top: 2px; }
@@ -13816,7 +13821,7 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
   };
   // everyday ways to bring an element in (traditional associations, own wording)
   const USE = [
-    { colours: 'green', work: '教育、设计、医疗、出版、植物与农业', life: '公园与绿地、阅读、种植', dir: '东' },
+    { colours: '绿色、青色', work: '教育、设计、医疗、出版、植物与农业', life: '公园与绿地、阅读、种植', dir: '东' },
     { colours: '红色、橙色、紫色', work: '媒体、营销、餐饮、能源、美容、屏幕与科技', life: '阳光、社交活动、热闹的地方、运动', dir: '南' },
     { colours: '黄色、米色、棕色', work: '房地产、建筑、行政、保险、咨询、人事', life: '规律的作息、做饭、家居与园艺', dir: '中央、东北和西南' },
     { colours: '白色、金色、银色、灰色', work: '金融、法律、工程、机械、电脑硬件、珠宝', life: '整理与断舍离、清楚的规矩、干净利落的空间', dir: '西方和西北' },
