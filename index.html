@@ -9316,7 +9316,7 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     </section>
 
     <section class="card" aria-labelledby="sH">
-      <header><h2 id="sH"><svg class="ic" aria-hidden="true"><use href="#i-scale"></use></svg>Day Master strength <span class="zh">旺衰</span></h2></header>
+      <header><h2 id="sH"><svg class="ic" aria-hidden="true"><use href="#i-scale"></use></svg>Day Master <span class="zh">日主</span></h2></header>
       <div id="sHead"></div>
       <div id="tug"></div>
       <h3 style="font-size:.95rem">The three classic checks</h3>
@@ -10588,7 +10588,74 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     return { index: k, name: STAGES[k][0], zh: STAGES[k][1], note: STAGE_NOTE[k], strong: [0, 2, 3, 4].includes(k), weak: [6, 7, 9].includes(k) };
   }
 
-  return { USE, readChart, findInteractions, strength, godWeights, elementShares, BODY, GOD_ZH, GOD_TRAIT, GROUP_OF, GROUP_ZH, KIND, EL_ZH, PAL, setOptions, lifeStage, STAGES };
+  // ---- one 10-year luck pillar in plain words (own wording) ----
+  const DECADE_GOD = {
+    F: 'more people like you around: friends, peers and partners. You feel independent and sure of yourself, but money and credit tend to be shared',
+    RW: 'competition and bold moves. You push harder and take more risks; rivals and shared money are the weak spot',
+    EG: 'an easier, creative stretch. Skills, hobbies and enjoyment grow, and life feels less forced',
+    HO: 'breaking out of old moulds. You speak up, change direction and show your talent; friction with bosses and rules is likely',
+    IW: 'openings and fast money: deals, side income, travel and new contacts. Money comes in quickly and goes out just as quickly',
+    DW: 'steady earning and building up assets. Patient work turns into savings and solid results',
+    SK: 'high pressure and high stakes: tough bosses, rivals or a crisis to handle. You can rise fast if you can carry the load',
+    DO: 'structure, position and reputation: promotions, titles and official matters. Doing things properly pays off',
+    IR: 'specialist, inward years: unusual skills, research and deeper interests. It can feel lonely or misunderstood at times',
+    DR: 'support, learning and security: qualifications, mentors, property and documents. A protected stretch',
+  };
+  const DECADE_SEX = { M: { DW: 'For a man, a common decade for a steady partner or marriage.', IW: 'For a man, romance tends to come easily.' },
+    F: { DO: 'For a woman, a common decade for a steady partner or marriage.', SK: 'For a woman, romance can be intense or complicated.', EG: 'For a woman, children often come into focus.', HO: 'For a woman, children often come into focus.' } };
+  const DECADE_DO = {
+    F: 'Build partnerships and a strong circle', RW: 'Compete for big goals and back yourself', EG: 'Turn a skill or hobby into something lasting', HO: 'Change what is not working and show your talent',
+    IW: 'Take good openings, network and try side income', DW: 'Save, invest steadily and build assets', SK: 'Take on hard challenges and leadership', DO: 'Go for promotion, titles and qualifications',
+    IR: 'Specialise and go deep in one field', DR: 'Study, get qualified, and lean on mentors',
+  };
+  const DECADE_DONT = {
+    F: 'Don\'t share money or sign joint loans lightly', RW: 'Don\'t gamble, lend big sums or start fights over money', EG: 'Don\'t drift or get too comfortable', HO: 'Don\'t burn bridges with bosses or break rules',
+    IW: 'Don\'t over-borrow or spread yourself too thin', DW: 'Don\'t be so careful you miss your chances', SK: 'Don\'t take reckless risks or fight every battle', DO: 'Don\'t cut corners with rules, tax or contracts',
+    IR: 'Don\'t cut yourself off from people', DR: 'Don\'t wait for others to decide for you',
+  };
+  const RATE_PLAN = {
+    supportive: ['Start the big things: launches, moves and long-term commitments get a tailwind', ''],
+    mixed: ['Pick your moves carefully: time big steps for supportive years inside this decade', ''],
+    challenging: ['Build slowly: save, upskill and keep fixed costs low', 'Don\'t stake everything on one big gamble in this decade'],
+  };
+  const LINK_RANK = ['clash', 'stemclash', 'triple', 'season', 'combo', 'half', 'stemcombo', 'punish', 'selfpunish', 'harm', 'destroy'];
+  function luckStory(chart, str, i) {
+    const L = chart.luck.pillars, p = L[i], dm = chart.dayMaster, sex = chart.input.gender === 'F' ? 'F' : 'M';
+    const rate = q => { const els = [S[q.stem].el, B[q.branch].el]; const u = els.filter(e => str.usefulEls.has(e)).length, b = els.filter(e => str.unfavEls.has(e)).length; return u > b ? 'supportive' : b > u ? 'challenging' : 'mixed'; };
+    const y0 = +p.from.slice(0, 4), a0 = Math.floor(p.ageFrom), rating = rate(p);
+    const sg = E.tenGod(dm, p.stem), bg = E.tenGod(dm, B[p.branch].hidden[0]);
+    const fit = el => str.usefulEls.has(el) ? `${elTxt(el)} is one of your helpful elements, so this part works in your favour.`
+      : str.unfavEls.has(el) ? `${elTxt(el)} is something you already have plenty of, so this part takes more effort.` : `${elTxt(el)} is neutral for you.`;
+    const half = (g, el, from, to) => ({ years: `${from}–${to}`, ages: `${a0 + from - y0}–${a0 + to - y0}`, god: godTxt(g), text: `${DECADE_GOD[g].charAt(0).toUpperCase() + DECADE_GOD[g].slice(1)}.${DECADE_SEX[sex][g] ? ' ' + DECADE_SEX[sex][g] : ''}`, fit: fit(el), tone: str.usefulEls.has(el) ? 'good' : str.unfavEls.has(el) ? 'bad' : '' });
+    const halves = [half(sg, S[p.stem].el, y0, y0 + 5), half(bg, B[p.branch].el, y0 + 5, y0 + 10)];
+    const stg = lifeStage(dm, p.branch);
+    const stage = `${stg.name} ${stg.zh}: ${stg.note}. ` + (stg.strong ? 'Your own energy runs high, so you can take on more.' : stg.weak ? 'Your own energy runs low, so pace yourself and protect your health.' : 'Your own energy is moderate.');
+    const pos = chart.pillars.filter(Boolean).map(x => ({ p: x.palace, stem: x.stem, branch: x.branch })).concat([{ p: 'luck', stem: p.stem, branch: p.branch }]);
+    const links = findInteractions(pos, ['luck']).filter(x => x.kind !== 'arch').map(x => {
+      const natal = x.between.filter(q => ACT[q]).sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)), good = x.tone === 'good', where = listTxt(natal.map(q => SHORT[q]));
+      if (!natal.length) return null;
+      let plain, tag = '';
+      if (x.kind === 'selfpunish') plain = `This decade repeats a branch from your ${where} side, so old worries there can come back.`;
+      else if (good) plain = `It links up with your ${where}: ${natal.map(q => ACT[q][0]).join('; ')}.`;
+      else plain = `It ${VERB_NOW[x.kind] || 'presses on'} your ${where}` + (x.kind === 'clash' || x.kind === 'stemclash' ? `: ${natal.map(q => ACT[q][1]).join('; ')}.` : `. Milder than a clash, so expect small versions of: ${natal.map(q => ACT[q][1]).join('; ')}.`);
+      if (x.kind === 'clash' || x.kind === 'stemclash') {
+        // which side loses: the natal character being knocked loose
+        const q = pos.find(z => z.p === natal[0]), el = x.part === 'stem' ? S[q.stem].el : B[q.branch].el;
+        if (str.unfavEls.has(el)) { tag = 'welcome'; plain += ` It shakes loose ${elTxt(el)}, which works against you, so the change tends to be for the better.`; }
+        else if (str.usefulEls.has(el)) { tag = 'costly'; plain += ` It shakes loose ${elTxt(el)}, one of your helpful elements, so guard what you have built.`; }
+      }
+      if (x.el !== undefined && good) { if (str.usefulEls.has(x.el)) plain += ` It also builds ${elTxt(x.el)}, which helps you.`; else if (str.unfavEls.has(x.el)) plain += ` It builds ${elTxt(x.el)} though, which you have enough of.`; }
+      return { title: `${x.name} ${x.zh}`, plain, tone: x.tone, tag, between: x.between, part: x.part, kind: x.kind };
+    }).filter(Boolean)
+      // the strongest bonds first; minor ones (harm, destroy) only if room is left
+      .sort((a, b) => LINK_RANK.indexOf(a.kind) - LINK_RANK.indexOf(b.kind)).slice(0, 4);
+    const dos = [DECADE_DO[sg], DECADE_DO[bg], RATE_PLAN[rating][0]].filter((v, k, a) => v && a.indexOf(v) === k);
+    const donts = [DECADE_DONT[sg], DECADE_DONT[bg], RATE_PLAN[rating][1]].filter((v, k, a) => v && a.indexOf(v) === k);
+    const nx = L[i + 1], pv = L[i - 1];
+    const turn = pv ? `The switch into this decade around ${y0} often brings a clear change of direction${rate(pv) !== rating ? `, here from ${rate(pv)} to ${rating}` : ''}.` : '';
+    return { y0, a0, rating, sg, bg, halves, stage, links, dos, donts, turn, next: nx ? { zh: nx.zh, from: nx.from.slice(0, 4), age: Math.floor(nx.ageFrom), rating: rate(nx) } : null };
+  }
+  return { USE, readChart, findInteractions, luckStory, RATING_TXT, strength, godWeights, elementShares, BODY, GOD_ZH, GOD_TRAIT, GROUP_OF, GROUP_ZH, KIND, EL_ZH, PAL, setOptions, lifeStage, STAGES };
 });
 
 </script>
@@ -12372,15 +12439,17 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     if (!lastReading) return;
     const { c, r } = lastReading, p = c.luck.pillars[i], rt = rateOf(p, r);
     document.querySelectorAll('#tline .tchip').forEach((b, k) => b.classList.toggle('sel', k === i));
-    const sg = E.tenGod(c.dayMaster, p.stem), bg = E.tenGod(c.dayMaster, E.BRANCHES[p.branch].hidden[0]);
-    const pos = c.pillars.filter(Boolean).map(x => ({ p: x.palace, stem: x.stem, branch: x.branch })).concat([{ p: 'luck', stem: p.stem, branch: p.branch }]);
-    const xs = RL.findInteractions(pos, ['luck']);
-    const end = c.luck.pillars[i + 1] ? c.luck.pillars[i + 1].from.slice(0, 4) : String(+p.from.slice(0, 4) + 10);
+    const L = RL.luckStory(c, r.strength, i), xs = L.links;
+    const end = String(L.y0 + 10), tagTxt = { welcome: ' <span class="rate r-supportive">welcome change</span>', costly: ' <span class="rate r-challenging">costly change</span>' };
     const box = $('tlInfo');
-    box.innerHTML = closeBtn + `<h3><span class="glyph e-${EL(E.STEMS[p.stem].el)}">${p.zh}</span>${p.label} · age ${Math.floor(p.ageFrom)}–${Math.floor(p.ageFrom) + 10} (${p.from.slice(0, 4)}–${end})</h3>
-      <p><span class="rate r-${rt}">${rt}</span> ${EL(E.STEMS[p.stem].el)} over ${EL(E.BRANCHES[p.branch].el)}, judged against your helpful elements.</p>
-      <p>Brings <b>${E.TEN_GODS[sg].name} ${GOD_ZH[sg]}</b> on top and <b>${E.TEN_GODS[bg].name} ${GOD_ZH[bg]}</b> below: ${GROUP_LINE[RL.GROUP_OF[sg]].toLowerCase()}</p>
-      ${xs.length ? `<p><b>With your natal chart:</b></p><ul>${xs.map(x => `<li>${x.name} ${x.zh} with your ${x.between.filter(q => q !== 'luck').join(' and ')} pillar</li>`).join('')}</ul>` : '<p class="muted small">No combinations or clashes with your natal pillars.</p>'}`;
+    box.innerHTML = closeBtn + `<h3><span class="glyph e-${EL(E.STEMS[p.stem].el)}">${p.zh}</span>${p.label} · age ${L.a0}–${L.a0 + 10} (${L.y0}–${end})</h3>
+      <p><span class="rate r-${rt}">${rt} ${RATE_ZH[rt]}</span> ${RL.RATING_TXT[rt].replace(/^[^:：]*[:：]\s*/, '').replace(/^./, m => m.toUpperCase())}</p>
+      ${L.halves.map((h, k) => `<p><b>${k ? 'Second half' : 'First half'}, ${h.years} (age ${h.ages}): ${h.god}</b><br>${h.text}<br><span class="small" style="color:var(--${h.tone || 'muted'})">${h.fit}</span></p>`).join('')}
+      <p class="muted small">The first five years follow the top character, the last five the branch below. Most schools give the branch more weight, so the second half usually feels stronger.</p>
+      <p><b>Your energy this decade.</b> ${L.stage}</p>
+      ${xs.length ? `<p><b>How it meets your birth chart</b></p><ul>${xs.map(x => `<li><b>${x.title}</b>${tagTxt[x.tag] || ''}: ${x.plain}</li>`).join('')}</ul>` : '<p class="muted small">No combinations or clashes with your birth pillars, so this decade works mainly through its elements.</p>'}
+      <div class="mlists"><div class="g"><b>✓ Do</b><ul>${L.dos.map(x => `<li>${x}</li>`).join('')}</ul></div><div class="w"><b>✗ Don't</b><ul>${L.donts.map(x => `<li>${x}</li>`).join('')}</ul></div></div>
+      ${L.turn ? `<p class="small">${L.turn}</p>` : ''}${L.next ? `<p class="muted small">Next decade from ${L.next.from} (age ${L.next.age}): ${L.next.zh}, which looks ${L.next.rating}.</p>` : ''}`;
     box.hidden = false; enter(box);
     clearLit();
     xs.forEach(x => x.between.filter(q => q !== 'luck').forEach(q => document.querySelector(`#pillars [data-pos="${q}-${x.part}"]`)?.classList.add('lit')));
@@ -14522,7 +14591,74 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     return { index: k, name: STAGES[k][0], zh: STAGES[k][1], note: STAGE_NOTE[k], strong: [0, 2, 3, 4].includes(k), weak: [6, 7, 9].includes(k) };
   }
 
-  return { USE, readChart, findInteractions, strength, godWeights, elementShares, BODY, GOD_ZH, GOD_TRAIT, GROUP_OF, GROUP_ZH, KIND, EL_ZH, PAL, setOptions, lifeStage, STAGES };
+  // ---- one 10-year luck pillar in plain words (own wording) ----
+  const DECADE_GOD = {
+    F: '身边同类人多：朋友、同辈、合伙人。你更独立自信，但钱和功劳容易被分走',
+    RW: '竞争多，敢冲敢闯。你更拼、更愿意冒险；对手和合伙的钱是弱点',
+    EG: '轻松、有创意的阶段。技能、爱好和享受增多，生活不那么勉强',
+    HO: '打破旧框架。你敢说话、会转方向、展现才华；容易与上司和规矩起摩擦',
+    IW: '机会多、钱来得快：生意、副业、出行、新人脉。钱来得快，去得也快',
+    DW: '稳定赚钱、积累资产。耐心做事能换来积蓄和实在的成果',
+    SK: '压力大、风险高：难缠的上司、对手或要处理的危机。扛得住就能快速上升',
+    DO: '规矩、职位和名声：升职、头衔、公务。按规矩做事会有回报',
+    IR: '专精、向内的年份：偏门技能、研究和更深的兴趣。有时会觉得孤单或不被理解',
+    DR: '有靠山、学习、安稳：学历证书、贵人、房产和文书。是受保护的一段时间',
+  };
+  const DECADE_SEX = { M: { DW: '男命常在这十年有稳定伴侣或结婚。', IW: '男命这十年桃花较旺。' },
+    F: { DO: '女命常在这十年有稳定伴侣或结婚。', SK: '女命这十年感情可能强烈或复杂。', EG: '女命这十年子女之事常成为重点。', HO: '女命这十年子女之事常成为重点。' } };
+  const DECADE_DO = {
+    F: '建立合作和稳固的人脉圈', RW: '为大目标去争取，相信自己', EG: '把一项技能或爱好做成长久的事', HO: '改掉行不通的做法，展现才华',
+    IW: '抓住好机会、多结识人、试试副业', DW: '储蓄、稳健投资、积累资产', SK: '接下艰难任务，担起领导角色', DO: '争取升职、头衔和资格证书',
+    IR: '专攻一个领域，做深做精', DR: '进修、考证，多依靠贵人和老师',
+  };
+  const DECADE_DONT = {
+    F: '不要轻易与人合钱或共同借贷', RW: '不要赌博、借出大笔钱或为钱起争执', EG: '不要随波逐流或过于安逸', HO: '不要与上司闹翻或破坏规矩',
+    IW: '不要过度借贷或摊子铺太大', DW: '不要谨慎到错过机会', SK: '不要冒失冒险或事事都去硬拼', DO: '不要在规矩、税务或合同上走捷径',
+    IR: '不要把自己与人隔绝', DR: '不要等别人替你做决定',
+  };
+  const RATE_PLAN = {
+    supportive: ['大事可以开始：创业、搬迁和长期承诺都有顺风', ''],
+    mixed: ['谨慎选择时机：把大动作放在这十年里的顺年', ''],
+    challenging: ['慢慢打基础：储蓄、提升技能、压低固定开销', '这十年不要把一切押在一次大赌注上'],
+  };
+  const LINK_RANK = ['clash', 'stemclash', 'triple', 'season', 'combo', 'half', 'stemcombo', 'punish', 'selfpunish', 'harm', 'destroy'];
+  function luckStory(chart, str, i) {
+    const L = chart.luck.pillars, p = L[i], dm = chart.dayMaster, sex = chart.input.gender === 'F' ? 'F' : 'M';
+    const rate = q => { const els = [S[q.stem].el, B[q.branch].el]; const u = els.filter(e => str.usefulEls.has(e)).length, b = els.filter(e => str.unfavEls.has(e)).length; return u > b ? 'supportive' : b > u ? 'challenging' : 'mixed'; };
+    const y0 = +p.from.slice(0, 4), a0 = Math.floor(p.ageFrom), rating = rate(p);
+    const sg = E.tenGod(dm, p.stem), bg = E.tenGod(dm, B[p.branch].hidden[0]);
+    const fit = el => str.usefulEls.has(el) ? `${elTxt(el)}是你的喜用五行，这一段对你有利。`
+      : str.unfavEls.has(el) ? `${elTxt(el)}你已经够多了，这一段要多花力气。` : `${elTxt(el)}对你来说是中性的。`;
+    const half = (g, el, from, to) => ({ years: `${from}–${to}`, ages: `${a0 + from - y0}–${a0 + to - y0}`, god: godTxt(g), text: `${DECADE_GOD[g].charAt(0).toUpperCase() + DECADE_GOD[g].slice(1)}。${DECADE_SEX[sex][g] ? ' ' + DECADE_SEX[sex][g] : ''}`, fit: fit(el), tone: str.usefulEls.has(el) ? 'good' : str.unfavEls.has(el) ? 'bad' : '' });
+    const halves = [half(sg, S[p.stem].el, y0, y0 + 5), half(bg, B[p.branch].el, y0 + 5, y0 + 10)];
+    const stg = lifeStage(dm, p.branch);
+    const stage = `${stg.zh}：${stg.note}。` + (stg.strong ? '自身能量高，可以多承担一些。' : stg.weak ? '自身能量低，要放慢节奏、注意健康。' : '自身能量中等。');
+    const pos = chart.pillars.filter(Boolean).map(x => ({ p: x.palace, stem: x.stem, branch: x.branch })).concat([{ p: 'luck', stem: p.stem, branch: p.branch }]);
+    const links = findInteractions(pos, ['luck']).filter(x => x.kind !== 'arch').map(x => {
+      const natal = x.between.filter(q => ACT[q]).sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)), good = x.tone === 'good', where = listTxt(natal.map(q => SHORT[q]));
+      if (!natal.length) return null;
+      let plain, tag = '';
+      if (x.kind === 'selfpunish') plain = `这十年重复了你${where}方面的地支，那里的旧烦恼可能重来。`;
+      else if (good) plain = `它与你的${where}相合：${natal.map(q => ACT[q][0]).join('；')}。`;
+      else plain = `它${VERB_NOW[x.kind] || '压着'}你的${where}` + (x.kind === 'clash' || x.kind === 'stemclash' ? `：${natal.map(q => ACT[q][1]).join('；')}。` : `。程度比冲轻，可能出现较小的${natal.map(q => ACT[q][1]).join('；')}。`);
+      if (x.kind === 'clash' || x.kind === 'stemclash') {
+        // which side loses: the natal character being knocked loose
+        const q = pos.find(z => z.p === natal[0]), el = x.part === 'stem' ? S[q.stem].el : B[q.branch].el;
+        if (str.unfavEls.has(el)) { tag = 'welcome'; plain += `它冲动了${elTxt(el)}，这是对你不利的五行，所以变化多半是好事。`; }
+        else if (str.usefulEls.has(el)) { tag = 'costly'; plain += `它冲动了${elTxt(el)}，这是你的喜用五行，要守住已建立的东西。`; }
+      }
+      if (x.el !== undefined && good) { if (str.usefulEls.has(x.el)) plain += `此合还生出${elTxt(x.el)}，对你有利。`; else if (str.unfavEls.has(x.el)) plain += `不过它增加了${elTxt(x.el)}，而你已经够多了。`; }
+      return { title: `${x.name}`, plain, tone: x.tone, tag, between: x.between, part: x.part, kind: x.kind };
+    }).filter(Boolean)
+      // the strongest bonds first; minor ones (harm, destroy) only if room is left
+      .sort((a, b) => LINK_RANK.indexOf(a.kind) - LINK_RANK.indexOf(b.kind)).slice(0, 4);
+    const dos = [DECADE_DO[sg], DECADE_DO[bg], RATE_PLAN[rating][0]].filter((v, k, a) => v && a.indexOf(v) === k);
+    const donts = [DECADE_DONT[sg], DECADE_DONT[bg], RATE_PLAN[rating][1]].filter((v, k, a) => v && a.indexOf(v) === k);
+    const nx = L[i + 1], pv = L[i - 1];
+    const turn = pv ? `约${y0}年交运时，人生方向常有明显转变${rate(pv) !== rating ? `，这里由${({ supportive: '顺', mixed: '平', challenging: '逆' })[rate(pv)]}转${({ supportive: '顺', mixed: '平', challenging: '逆' })[rating]}` : ''}。` : '';
+    return { y0, a0, rating, sg, bg, halves, stage, links, dos, donts, turn, next: nx ? { zh: nx.zh, from: nx.from.slice(0, 4), age: Math.floor(nx.ageFrom), rating: rate(nx) } : null };
+  }
+  return { USE, readChart, findInteractions, luckStory, RATING_TXT, strength, godWeights, elementShares, BODY, GOD_ZH, GOD_TRAIT, GROUP_OF, GROUP_ZH, KIND, EL_ZH, PAL, setOptions, lifeStage, STAGES };
 });
 
 </script>
@@ -16309,15 +16445,17 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     if (!lastReading) return;
     const { c, r } = lastReading, p = c.luck.pillars[i], rt = rateOf(p, r);
     document.querySelectorAll('#tline .tchip').forEach((b, k) => b.classList.toggle('sel', k === i));
-    const sg = E.tenGod(c.dayMaster, p.stem), bg = E.tenGod(c.dayMaster, E.BRANCHES[p.branch].hidden[0]);
-    const pos = c.pillars.filter(Boolean).map(x => ({ p: x.palace, stem: x.stem, branch: x.branch })).concat([{ p: 'luck', stem: p.stem, branch: p.branch }]);
-    const xs = RL.findInteractions(pos, ['luck']);
-    const end = c.luck.pillars[i + 1] ? c.luck.pillars[i + 1].from.slice(0, 4) : String(+p.from.slice(0, 4) + 10);
+    const L = RL.luckStory(c, r.strength, i), xs = L.links;
+    const end = String(L.y0 + 10), tagTxt = { welcome: ' <span class="rate r-supportive">好的变动（冲去忌神）</span>', costly: ' <span class="rate r-challenging">代价较大的变动（冲去用神）</span>' };
     const box = $('tlInfo');
-    box.innerHTML = closeBtn + `<h3><span class="glyph e-${EL(E.STEMS[p.stem].el)}">${p.zh}</span>${p.label} · ${Math.floor(p.ageFrom)}–${Math.floor(p.ageFrom) + 10}岁（${p.from.slice(0, 4)}–${end}）</h3>
-      <p><span class="rate r-${rt}">${rt}</span> ${ELT(E.STEMS[p.stem].el)}在上、${ELT(E.BRANCHES[p.branch].el)}在下，按你的喜用五行来判断。</p>
-      <p>带来<b>${GOD_ZH[sg]}</b>在上，<b>${GOD_ZH[bg]}</b>在下：${GROUP_LINE[RL.GROUP_OF[sg]].toLowerCase()}</p>
-      ${xs.length ? `<p><b>与原局：</b></p><ul>${xs.map(x => `<li>与你的${x.between.filter(q => q !== 'luck').map(q => PALACE[q][0].replace('柱', '')).join('、')}柱${x.name}</li>`).join('')}</ul>` : '<p class="muted small">与原局各柱没有合或冲。</p>'}`;
+    box.innerHTML = closeBtn + `<h3><span class="glyph e-${EL(E.STEMS[p.stem].el)}">${p.zh}</span>大运 · ${L.a0}–${L.a0 + 10}岁（${L.y0}–${end}）</h3>
+      <p><span class="rate r-${rt}">${RATE_ZH[rt]}</span> ${RL.RATING_TXT[rt].replace(/^[^:：]*[:：]\s*/, '').replace(/^./, m => m.toUpperCase())}</p>
+      ${L.halves.map((h, k) => `<p><b>${k ? '后五年' : '前五年'}，${h.years}年（${h.ages}岁）：${h.god}</b><br>${h.text}<br><span class="small" style="color:var(--${h.tone || 'muted'})">${h.fit}</span></p>`).join('')}
+      <p class="muted small">前五年看天干，后五年看地支。多数流派更重地支，所以后五年通常感受更明显。</p>
+      <p><b>这十年的自身能量。</b> ${L.stage}</p>
+      ${xs.length ? `<p><b>与命局的互动</b></p><ul>${xs.map(x => `<li><b>${x.title}</b>${tagTxt[x.tag] || ''}：${x.plain}</li>`).join('')}</ul>` : '<p class="muted small">与命局四柱没有合冲，这十年主要通过五行起作用。</p>'}
+      <div class="mlists"><div class="g"><b>✓ 宜</b><ul>${L.dos.map(x => `<li>${x}</li>`).join('')}</ul></div><div class="w"><b>✗ 忌</b><ul>${L.donts.map(x => `<li>${x}</li>`).join('')}</ul></div></div>
+      ${L.turn ? `<p class="small">${L.turn}</p>` : ''}${L.next ? `<p class="muted small">下一步大运：从${L.next.from}年（${L.next.age}岁）起走${L.next.zh}，看起来${RATE_ZH[L.next.rating]}。</p>` : ''}`;
     box.hidden = false; enter(box);
     clearLit();
     xs.forEach(x => x.between.filter(q => q !== 'luck').forEach(q => document.querySelector(`#pillars [data-pos="${q}-${x.part}"]`)?.classList.add('lit')));
