@@ -583,6 +583,9 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
   .tugbar.enter i { animation: grow .9s cubic-bezier(.2,.7,.2,1) both; transform-origin: left; }
   .lp-card > * { animation: rise .5s cubic-bezier(.2,.7,.2,1) both; } .lp-card > *:nth-child(2) { animation-delay: 60ms; } .lp-card > *:nth-child(3) { animation-delay: 120ms; } .lp-card > *:nth-child(n+4) { animation-delay: 180ms; }
 }
+.hrow .hint { display: block; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.hrow .htags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.hinfo p { margin: 0; line-height: 1.5; }
 .rhead { display: block; font-weight: 700; line-height: 1.35; }
 .rbody { display: block; margin-top: 2px; line-height: 1.5; }
 .rsub { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 3px; line-height: 1.5; }
@@ -9304,6 +9307,11 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
         <div class="stages" id="stages"></div>
       </details>
     </section>
+    <section class="card" aria-labelledby="hfH" id="hourCard" hidden>
+      <header><h2 id="hfH"><svg class="ic" aria-hidden="true"><use href="#i-clock"></use></svg>Find the birth hour</h2><span id="estBadge"></span></header>
+      <p class="muted small">The birth time is unknown, so here are all 12 possible hour pillars. Read the traits and later-life themes, compare them with what you know about this person, and pick the closest. The choice is saved as an estimate and can be changed any time.</p>
+      <div class="hours" id="hours"></div>
+    </section>
 
     <section class="card" aria-labelledby="sH">
       <header><h2 id="sH"><svg class="ic" aria-hidden="true"><use href="#i-scale"></use></svg>Day Master strength <span class="zh">旺衰</span></h2></header>
@@ -9355,11 +9363,6 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
       </details>
     </section>
 
-    <section class="card" aria-labelledby="hfH" id="hourCard" hidden>
-      <header><h2 id="hfH"><svg class="ic" aria-hidden="true"><use href="#i-clock"></use></svg>Find the birth hour</h2><span id="estBadge"></span></header>
-      <p class="muted small">The birth time is unknown, so here are all 12 possible hour pillars. Read the traits and later-life themes, compare them with what you know about this person, and pick the closest. The choice is saved as an estimate and can be changed any time.</p>
-      <div class="hours" id="hours"></div>
-    </section>
 
     <section class="card" aria-labelledby="yH">
       <header><h2 id="yH"><svg class="ic" aria-hidden="true"><use href="#i-sun"></use></svg>Year planner <span class="zh">流年</span></h2></header>
@@ -9984,7 +9987,7 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
 
   // ---------------- ten gods: one line each per topic (own wording) ----------------
   const GOD_TRAIT = {
-    F: 'self-reliant and fair-minded; you prefer equals to bosses',
+    F: 'self-reliant and fair-minded; you work best alongside equals rather than under a boss',
     RW: 'bold and competitive; you are energised by people and challenges',
     EG: 'easy-going and creative; you enjoy craft, comfort and doing things well',
     HO: 'sharp and expressive; you question rules and like to perform or innovate',
@@ -11542,6 +11545,27 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     Officer: 'responsibility into later life; children who are disciplined or ambitious',
     Resource: 'a supported, reflective later life; learning and teaching',
   };
+  // a question to ask about the real person: does this hour's top character fit them? (own wording)
+  const HOUR_CHECK = {
+    F: 'Is this person independent, set on doing things their own way, and closest to friends or siblings?',
+    RW: 'Are they competitive and bold, quick to take risks with money or to argue their case?',
+    EG: 'Are they easy-going and fond of food and comfort, creative with their hands, slow to get stressed?',
+    HO: 'Are they outspoken and quick-witted, critical of rules, good at performing, selling or fixing things?',
+    IW: 'Are they sociable and generous, good at spotting deals, and do they spend freely?',
+    DW: 'Are they careful with money, hard-working and dependable, a little cautious?',
+    SK: 'Are they intense and driven, at their best under pressure, sometimes harsh with themselves or others?',
+    DO: 'Are they orderly and responsible, careful about reputation and doing things properly?',
+    IR: 'Are they private and unconventional, drawn to niche, technical or spiritual subjects?',
+    DR: 'Are they gentle and studious, often looked after by others, and slow to change?',
+  };
+  const HOUR_LINK = {
+    'combo-day': 'The hour combines with the day branch (your spouse palace): a warm home and a close bond with children.',
+    'clash-day': 'The hour clashes the day branch: a restless home life, moving house more than most, or friction with children.',
+    'harm-day': 'The hour and day branch quietly hurt each other: small frictions at home; sleep and health need care.',
+    'clash-month': 'The hour clashes the month branch (career): a change of direction in mid-to-late life.',
+    'clash-year': 'The hour clashes the year branch (family roots): often ends up living far from where they grew up.',
+    'combo-month': 'The hour combines with the month branch: career and personal projects support each other.',
+  };
   function hourCandidates(input, now = new Date()) {
     const base = E.computeChart(Object.assign({}, input, { time: null }));
     const baseR = RL.readChart(base, now);
@@ -11554,7 +11578,15 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
       if (r.strength.verdict !== baseR.strength.verdict) changes.push(`strength becomes ${r.strength.verdict.toLowerCase()}`);
       const ue = [...r.strength.usefulEls].join(), be = [...baseR.strength.usefulEls].join();
       if (ue !== be) changes.push(`helpful elements become ${[...r.strength.usefulEls].map(e => EL[e]).join(', ')}`);
-      return { k, label: HOUR_LABEL[k], time: t, animal: B[h.branch].animal, pillar: h, god: g, group: grp, trait: RL.GOD_TRAIT[g], later: LATER[grp], strength: r.strength.verdict, changes };
+      // what this hour does to the rest of the chart
+      const links = [], seen = new Set();
+      r.interactions.forEach(x => { if (!x.why.some(w => w.p === 'hour') || x.why.some(w => w.part === 'stem')) return;
+        const other = x.why.map(w => w.p).find(p => p !== 'hour'), kind = x.kind === 'half' ? 'combo' : x.kind === 'punish' ? 'harm' : x.kind, key = `${kind}-${other}`;
+        if (HOUR_LINK[key] && !seen.has(key)) { seen.add(key); links.push(HOUR_LINK[key]); } });
+      const stars = TM.natalStars(c).filter(st => st.where.includes('hour')).map(st => `${st.name}: ${st.meaning}`);
+      const stage = RL.lifeStage(c.dayMaster, h.branch);
+      return { k, label: HOUR_LABEL[k], time: t, animal: B[h.branch].animal, pillar: h, god: g, group: grp, trait: RL.GOD_TRAIT[g], later: LATER[grp], strength: r.strength.verdict, strengthZh: r.strength.zh, changes,
+        check: HOUR_CHECK[g], links, stars, stage, strengthChanged: r.strength.verdict !== baseR.strength.verdict };
     });
   }
 
@@ -12340,9 +12372,16 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     const cand = XT.hourCandidates(Object.assign(inputOf(p), { time: null }), new Date());
     $('hours').innerHTML = cand.map(x => {
       const st = E.STEMS[x.pillar.stem], picked = p.timeEstimated && x.time === p.time, sel = view.hourSel === x.k;
+      const tags = [x.links.length ? `${x.links.length} link${x.links.length > 1 ? 's' : ''} to your chart` : '', x.stars.length ? x.stars.map(s => s.split(':')[0]).join(', ') : '', x.strengthChanged ? 'changes strength' : ''].filter(Boolean);
       return `<button type="button" class="hrow${sel || picked ? ' sel' : ''}" data-hour="${x.k}" aria-expanded="${sel}"><span><b class="small">${x.label}</b><br><small>${x.animal} hour</small></span><span class="zh e-${EL(st.el)}" style="border-radius:7px;text-align:center;padding:2px 0">${x.pillar.zh}</span>
-        <span class="small">${E.TEN_GODS[x.god].name} <span class="zh">${GOD_ZH[x.god]}</span>: ${esc(x.trait)}${picked ? ' · <b>current estimate</b>' : ''}</span></button>
-        ${sel ? `<div class="info enter">${closeBtn}<p><b>${x.label} · ${x.pillar.zh} ${x.pillar.label}</b></p><ul><li>Personality: ${esc(x.trait)}.</li><li>Later life and children: ${esc(x.later)}.</li><li>Strength would read: ${esc(x.strength)}.</li>${x.changes.length ? `<li>Compared with no hour: ${esc(x.changes.join('; '))}.</li>` : '<li>Nothing else in the chart changes.</li>'}</ul>
+        <span class="small" style="min-width:0"><b>${E.TEN_GODS[x.god].name} <span class="zh">${GOD_ZH[x.god]}</span></b> on top${picked ? ' · <b>current estimate</b>' : ''}<span class="hint">${esc(x.trait.charAt(0).toUpperCase() + x.trait.slice(1))}.</span>${tags.length ? `<span class="htags">${tags.map(t => `<span class="mtag">${esc(t)}</span>`).join('')}</span>` : ''}</span></button>
+        ${sel ? `<div class="info enter hinfo">${closeBtn}<h3><span class="glyph e-${EL(st.el)}">${x.pillar.zh}</span>${x.label} · ${x.animal} hour</h3>
+          <p><b>If born in this hour</b><br>The hour stem is ${E.TEN_GODS[x.god].name} <span class="zh">${GOD_ZH[x.god]}</span>, which adds a streak of being ${esc(x.trait)}.</p>
+          <p class="gtip"><b>Check against the real person:</b> ${esc(x.check)}</p>
+          <p><b>Home, children and later life</b><br>${esc(x.later.charAt(0).toUpperCase() + x.later.slice(1))}.${x.links.length ? ' ' + x.links.map(esc).join(' ') : ''}</p>
+          <p><b>Your Day Master in this hour</b><br>${x.stage.name} <span class="zh">${x.stage.zh}</span>: ${esc(x.stage.note)}.</p>
+          ${x.stars.length ? `<p><b>Special stars in this hour</b><br>${x.stars.map(esc).join('<br>')}.</p>` : ''}
+          <p><b>What changes in the chart</b><br>Strength would read ${esc(x.strength.toLowerCase())} <span class="zh">${x.strengthZh}</span>.${x.changes.length ? ' ' + esc(x.changes.join('; ').charAt(0).toUpperCase() + x.changes.join('; ').slice(1)) + '.' : ' Nothing else changes.'}</p>
           <div class="btnrow"><button class="btn accent small" type="button" data-act="useHour" data-time="${x.time}">${icon('check')}Use this hour</button>${p.timeEstimated ? `<button class="btn small" type="button" data-act="clearHour">Back to unknown</button>` : ''}</div></div>` : ''}`;
     }).join('');
   }
@@ -13101,6 +13140,11 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
         <div class="stages" id="stages"></div>
       </details>
     </section>
+    <section class="card" aria-labelledby="hfH" id="hourCard" hidden>
+      <header><h2 id="hfH"><svg class="ic" aria-hidden="true"><use href="#i-clock"></use></svg>推算出生时辰</h2><span id="estBadge"></span></header>
+      <p class="muted small">出生时间不详，所以这里列出所有12个可能的时柱。阅读每个时柱的特点和晚年主题，与你对这个人的了解比较，选出最接近的一个。你的选择会存为估计值，随时可以更改。</p>
+      <div class="hours" id="hours"></div>
+    </section>
 
     <section class="card" aria-labelledby="sH">
       <header><h2 id="sH"><svg class="ic" aria-hidden="true"><use href="#i-scale"></use></svg>日主旺衰</h2></header>
@@ -13152,11 +13196,6 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
       </details>
     </section>
 
-    <section class="card" aria-labelledby="hfH" id="hourCard" hidden>
-      <header><h2 id="hfH"><svg class="ic" aria-hidden="true"><use href="#i-clock"></use></svg>推算出生时辰</h2><span id="estBadge"></span></header>
-      <p class="muted small">出生时间不详，所以这里列出所有12个可能的时柱。阅读每个时柱的特点和晚年主题，与你对这个人的了解比较，选出最接近的一个。你的选择会存为估计值，随时可以更改。</p>
-      <div class="hours" id="hours"></div>
-    </section>
 
     <section class="card" aria-labelledby="yH">
       <header><h2 id="yH"><svg class="ic" aria-hidden="true"><use href="#i-sun"></use></svg>流年规划</h2></header>
@@ -15340,6 +15379,27 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     Officer: '晚年仍有责任；子女自律或有抱负',
     Resource: '有人支持、喜欢思考的晚年；学习与教学',
   };
+  // a question to ask about the real person: does this hour's top character fit them? (own wording)
+  const HOUR_CHECK = {
+    F: '这个人是否独立、凡事坚持自己的做法，和朋友或兄弟姐妹最亲近？',
+    RW: '他/她是否好胜、大胆，在钱上敢冒险，也很会据理力争？',
+    EG: '他/她是否随和、爱吃爱舒适、手巧有创意，不容易紧张？',
+    HO: '他/她是否直言、机灵、爱挑规矩的毛病，擅长表演、销售或修理东西？',
+    IW: '他/她是否爱交际、大方、会抓生意机会，花钱也比较随意？',
+    DW: '他/她是否用钱谨慎、勤奋可靠，有点保守？',
+    SK: '他/她是否性格强烈、有冲劲，压力越大表现越好，有时对自己或别人很严厉？',
+    DO: '他/她是否有条理、负责任，重视名声，做事讲规矩？',
+    IR: '他/她是否内敛、不走寻常路，喜欢冷门、技术或玄学类的东西？',
+    DR: '他/她是否温和、爱读书、常受人照顾，不太喜欢改变？',
+  };
+  const HOUR_LINK = {
+    'combo-day': '时支合日支（夫妻宫）：家庭温暖，与子女关系亲密。',
+    'clash-day': '时支冲日支：家庭生活不安定，搬家比一般人多，或与子女有摩擦。',
+    'harm-day': '时支与日支相害或相刑：家中多小摩擦；要注意睡眠和健康。',
+    'clash-month': '时支冲月支（事业）：中晚年事业容易转向。',
+    'clash-year': '时支冲年支（祖业）：往往会远离出生成长的地方。',
+    'combo-month': '时支合月支：事业和个人计划互相成就。',
+  };
   function hourCandidates(input, now = new Date()) {
     const base = E.computeChart(Object.assign({}, input, { time: null }));
     const baseR = RL.readChart(base, now);
@@ -15352,7 +15412,15 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
       if (r.strength.verdict !== baseR.strength.verdict) changes.push(`旺衰变为${r.strength.zh}`);
       const ue = [...r.strength.usefulEls].join(), be = [...baseR.strength.usefulEls].join();
       if (ue !== be) changes.push(`喜用五行变为${[...r.strength.usefulEls].map(e => EL[e]).join('、')}`);
-      return { k, label: HOUR_LABEL[k], time: t, animal: B[h.branch].animal, pillar: h, god: g, group: grp, trait: RL.GOD_TRAIT[g], later: LATER[grp], strength: r.strength.zh, changes };
+      // what this hour does to the rest of the chart
+      const links = [], seen = new Set();
+      r.interactions.forEach(x => { if (!x.why.some(w => w.p === 'hour') || x.why.some(w => w.part === 'stem')) return;
+        const other = x.why.map(w => w.p).find(p => p !== 'hour'), kind = x.kind === 'half' ? 'combo' : x.kind === 'punish' ? 'harm' : x.kind, key = `${kind}-${other}`;
+        if (HOUR_LINK[key] && !seen.has(key)) { seen.add(key); links.push(HOUR_LINK[key]); } });
+      const stars = TM.natalStars(c).filter(st => st.where.includes('hour')).map(st => `${st.name}: ${st.meaning}`);
+      const stage = RL.lifeStage(c.dayMaster, h.branch);
+      return { k, label: HOUR_LABEL[k], time: t, animal: B[h.branch].animal, pillar: h, god: g, group: grp, trait: RL.GOD_TRAIT[g], later: LATER[grp], strength: r.strength.zh, strengthZh: r.strength.zh, changes,
+        check: HOUR_CHECK[g], links, stars, stage, strengthChanged: r.strength.verdict !== baseR.strength.verdict };
     });
   }
 
@@ -16140,9 +16208,16 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     const cand = XT.hourCandidates(Object.assign(inputOf(p), { time: null }), new Date());
     $('hours').innerHTML = cand.map(x => {
       const st = E.STEMS[x.pillar.stem], picked = p.timeEstimated && x.time === p.time, sel = view.hourSel === x.k;
+      const tags = [x.links.length ? `与命局有${x.links.length}处联系` : '', x.stars.length ? x.stars.map(s => s.split(':')[0]).join('、') : '', x.strengthChanged ? '会改变旺衰' : ''].filter(Boolean);
       return `<button type="button" class="hrow${sel || picked ? ' sel' : ''}" data-hour="${x.k}" aria-expanded="${sel}"><span><b class="small">${x.label}</b><br><small>${x.animal}时</small></span><span class="zh e-${EL(st.el)}" style="border-radius:7px;text-align:center;padding:2px 0">${x.pillar.zh}</span>
-        <span class="small">${GOD_ZH[x.god]}: ${esc(x.trait)}${picked ? ' · <b>当前估计</b>' : ''}</span></button>
-        ${sel ? `<div class="info enter">${closeBtn}<p><b>${x.label} · ${x.pillar.zh} ${x.pillar.label}</b></p><ul><li>性格：${esc(x.trait)}。</li><li>晚年与子女：${esc(x.later)}。</li><li>旺衰会变成：${esc(x.strength)}。</li>${x.changes.length ? `<li>与没有时柱相比：${esc(x.changes.join('；'))}。</li>` : '<li>命局中其他部分都不变。</li>'}</ul>
+        <span class="small" style="min-width:0"><b>${GOD_ZH[x.god]}</b>透于时干${picked ? ' · <b>当前估计</b>' : ''}<span class="hint">${esc(x.trait.charAt(0).toUpperCase() + x.trait.slice(1))}。</span>${tags.length ? `<span class="htags">${tags.map(t => `<span class="mtag">${esc(t)}</span>`).join('')}</span>` : ''}</span></button>
+        ${sel ? `<div class="info enter hinfo">${closeBtn}<h3><span class="glyph e-${EL(st.el)}">${x.pillar.zh}</span>${x.label} · ${x.animal}时</h3>
+          <p><b>如果生于这个时辰</b><br>时干是${GOD_ZH[x.god]}，会多一分这样的性格：${esc(x.trait)}。</p>
+          <p class="gtip"><b>对照本人：</b> ${esc(x.check)}</p>
+          <p><b>家庭、子女与晚年</b><br>${esc(x.later.charAt(0).toUpperCase() + x.later.slice(1))}。${x.links.length ? ' ' + x.links.map(esc).join(' ') : ''}</p>
+          <p><b>日主在此时辰的状态</b><br>${x.stage.zh}：${esc(x.stage.note)}。</p>
+          ${x.stars.length ? `<p><b>时柱的神煞</b><br>${x.stars.map(esc).join('<br>')}.</p>` : ''}
+          <p><b>命局会有什么变化</b><br>旺衰会是${x.strengthZh}。${x.changes.length ? ' ' + esc(x.changes.join('；').charAt(0).toUpperCase() + x.changes.join('；').slice(1)) + '.' : '其他都不变。'}</p>
           <div class="btnrow"><button class="btn accent small" type="button" data-act="useHour" data-time="${x.time}">${icon('check')}用这个时辰</button>${p.timeEstimated ? `<button class="btn small" type="button" data-act="clearHour">改回不详</button>` : ''}</div></div>` : ''}`;
     }).join('');
   }
