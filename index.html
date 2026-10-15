@@ -16772,7 +16772,8 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     gold: ['#8a6510', '#e0b85c', '#f6eedb', '#352a14', 'Gold 金'], plum: ['#84306f', '#e091cc', '#f4e2ef', '#35202f', 'Plum 紫'],
   };
   var AKEY = 'bazi.accent.v1', st = document.createElement('style');
-  document.head.appendChild(st);
+  // after the main stylesheet, so these colours win over its defaults
+  document.currentScript.parentNode.insertBefore(st, document.currentScript);
   window.setAccent = function (k, save) {
     var a = ACCENTS[k] || ACCENTS.jade; window.BAZI_ACCENT = ACCENTS[k] ? k : 'jade';
     st.textContent = ':root{--accent:' + a[0] + ';--accent-soft:' + a[2] + '}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--accent:' + a[1] + ';--accent-soft:' + a[3] + '}}:root[data-theme="dark"]{--accent:' + a[1] + ';--accent-soft:' + a[3] + '}';
