@@ -373,6 +373,8 @@ table.grid tr[data-pair]:hover td { background: var(--accent-soft); }
 .tour-in p { margin: 0; }
 .tour-on { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
 .rate.r-neutral { background: color-mix(in srgb, var(--muted) 14%, transparent); color: var(--muted); }
+/* on phones the section shortcuts stay at the top of the page instead of following the scroll */
+@media (max-width: 700px) { .jumpbar { position: static !important; } }
 /* folding */
 section.fold { position: relative; }
 section.fold > h2, section.fold > header { padding-right: 40px; }
@@ -385,7 +387,7 @@ section.fold.closed { padding-bottom: 12px; }
 @media (prefers-reduced-motion: no-preference) {
   .foldbtn .chev { transition: transform .3s cubic-bezier(.3,1.4,.5,1); }
   .foldbtn:active { transform: scale(.9); }
-  section.fold.enter:not(.closed) > :not(h2):not(header):not(.foldbtn) { animation: unfold .4s cubic-bezier(.2,.7,.2,1) both; }
+  section.fold.enter:not(.closed) > :not(h2):not(header):not(.foldbtn) { animation: unfold .4s cubic-bezier(.2,.7,.2,1) backwards; }
   section.fold.enter:not(.closed) > :nth-child(3) { animation-delay: 50ms; } section.fold.enter:not(.closed) > :nth-child(4) { animation-delay: 100ms; } section.fold.enter:not(.closed) > :nth-child(n+5) { animation-delay: 150ms; }
   @keyframes unfold { from { opacity: 0; transform: translateY(-8px); } }
   .rfit button { transition: transform .15s, color .2s, border-color .2s; }
@@ -553,7 +555,7 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
 .pitem { transition: transform .15s, box-shadow .15s, border-color .15s; }
 @media (prefers-reduced-motion: no-preference) {
   .cell, .mini { transition: box-shadow .2s, opacity .2s; }
-  main.enter > section, main.enter > div > section, main.enter > .btnrow, main.enter > .back { animation: rise .45s cubic-bezier(.2,.7,.2,1) both; animation-delay: var(--d, 0ms); }
+  main.enter > section, main.enter > div > section, main.enter > .btnrow, main.enter > .back { animation: rise .45s cubic-bezier(.2,.7,.2,1) backwards; /* backwards, not both: a finished animation must not trap the bottom sheets inside */ animation-delay: var(--d, 0ms); }
   @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
   .pillars.enter .p { animation: flip .55s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 90ms + 120ms); transform-origin: top; }
   @keyframes flip { from { opacity: 0; transform: perspective(500px) rotateX(-70deg); } to { opacity: 1; transform: none; } }
@@ -659,6 +661,43 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
 .gall { margin: 6px 0 4px; color: var(--muted, #777); font-size: .85rem; text-transform: none; }
 .ggrp { margin-top: 12px; }
 .ggrp h3 { font-size: .95rem; margin: 0 0 8px; }
+
+/* ---- design system: one set of shapes and sizes for every screen ---- */
+:root { --r-card: 16px; --r-ctl: 12px; --r-pill: 999px; --fs-tag: .76rem; --fs-micro: .7rem; }
+.card { border-radius: var(--r-card); }
+.btn, .back { border-radius: var(--r-ctl); }
+.rate, .chip, .basis, .pts, .fstat, .bst, .badge-est, .cmpres span, .minis span, .cfp { font-size: var(--fs-tag); font-weight: 600; padding: 3px 10px; line-height: 1.35; border-radius: var(--r-pill); }
+.mtag, .eltag, .lv, .who2 .it { font-size: var(--fs-micro); font-weight: 600; border-radius: var(--r-pill); }
+.jchip, .why, .fitrow button, .rfit button, .seg button { border-radius: var(--r-pill); font-size: .8rem; font-weight: 600; }
+/* colour is for things you can tap and for "now": headings and their icons stay quiet */
+h2 .ic { color: var(--muted); }
+/* grouped lists, like iPhone Settings: one inset group, rows split by hairlines */
+#plist:has(.pitem) { gap: 0 !important; border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; background: var(--surface); }
+#plist .pitem { border: 0; border-radius: 0; box-shadow: none !important; transform: none !important; border-bottom: 1px solid var(--line); }
+#plist .pitem:last-child { border-bottom: 0; }
+#plist .pitem:hover, #plist .pitem:focus-visible { background: color-mix(in srgb, var(--muted) 6%, var(--surface)); }
+#vSettings section.card, #vToday section.card { border-color: transparent; box-shadow: none; }
+#vSettings section.card > header h2, #vSettings section.card > h2 { font-family: var(--body); font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+#vSettings section.card h2 .ic { display: none; }
+#you h2 { font-size: 1.75rem; line-height: 1.15; }
+/* detail boxes become bottom sheets on phones: grab handle, dimmed backdrop, swipe down to close */
+.sheetbg { position: fixed; inset: 0; z-index: 44; background: rgb(0 0 0 / .28); display: none; }
+@media (max-width: 700px) {
+  body:has(.info:not([hidden])) .sheetbg { display: block; }
+  .info:not([hidden]) { position: fixed !important; left: 0; right: 0; bottom: 0; top: auto; z-index: 46; margin: 0 !important; max-height: 78vh; overflow-y: auto; overscroll-behavior: contain; border-radius: 18px 18px 0 0 !important; padding: 26px 18px calc(18px + env(safe-area-inset-bottom, 0px)) !important; background: var(--surface) !important; box-shadow: 0 -10px 30px rgb(0 0 0 / .22); }
+  .info:not([hidden])::before { content: ''; position: absolute; top: 8px; left: 50%; width: 38px; height: 5px; margin-left: -19px; border-radius: 99px; background: var(--line); }
+  .info .x { top: 10px !important; right: 10px !important; }
+}
+@media (max-width: 700px) and (prefers-reduced-motion: no-preference) {
+  .info:not([hidden]) { animation: sheetUp .32s cubic-bezier(.2,.8,.2,1) both !important; }
+  @keyframes sheetUp { from { transform: translateY(100%); } }
+}
+/* touch targets at least 44 pt on phones */
+@media (pointer: coarse) {
+  .btn, .why, .rfit button, .fitrow button, .seg button, .jchip, .x, .foldbtn { min-height: 44px; }
+  .rfit button, .why { padding-inline: 14px; }
+  .foldbtn { min-width: 44px; }
+}
 </style><script>
 ;(function(root,factory){
   if (typeof define==='function'&&define.amd){
@@ -9484,6 +9523,7 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     </div>
     <section class="card report" id="reportBody"></section>
   </main>
+  <div class="sheetbg" id="sheetbg" aria-hidden="true"></div>
   <div id="tour" class="tour" hidden role="dialog" aria-live="polite" aria-labelledby="tourH">
     <div class="tour-in"><small class="muted" id="tourN"></small><h2 id="tourH" style="font-size:1.05rem"></h2><p id="tourT" class="small"></p>
       <div class="btnrow"><button class="btn small" type="button" data-act="tourBack" id="tourBack">Back</button><button class="btn accent small" type="button" data-act="tourNext" id="tourNext">Next</button><button class="btn small" type="button" data-act="tourEnd">Skip</button></div></div>
@@ -12101,6 +12141,8 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
   const icon = (n, cls = '') => `<svg class="ic${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="#i-${n}"></use></svg>`;
   const EL_ICON = ['leaf', 'flame', 'mountain', 'coin', 'drop'];
   const reduced = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+  // light haptic tap where the device supports it (Android); silent elsewhere
+  const tick = () => { try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) { } };
   function enter(el) { if (!el) return; el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
   function toast(msg, kind = 'ok') {
     const t = document.createElement('div'); t.className = 'toast' + (kind === 'err' ? ' err' : '');
@@ -12323,18 +12365,23 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     if (!rows.length) return '';
     return `<h3 style="font-size:.95rem;margin:10px 0 4px">Reading points marked <span class="zh">解读反馈</span></h3><ul class="small">${rows.map(x => `<li><b>${x.label} <span class="zh">${x.z}</span></b>: ${x.y} of ${x.n} fit (${Math.round(x.y / x.n * 100)}%)${x.n >= 5 && x.y / x.n < 0.5 ? ' · <span style="color:var(--bad)">often off for your people</span>' : ''}</li>`).join('')}</ul>`;
   }
+  function basisTag(r) { return r.basis === 'own'
+      ? `<span class="basis own" title="The app's own weighting or threshold: less certain, treat as a guide.">${icon('scale')}App's own weighting</span>`
+      : `<span class="basis std" title="A mainstream classical BaZi rule.">${icon('check')}Classic rule</span>`; }
+  // the point's extras sit in one row under the text: fit marks, Why, and the rule type
+  function moreMenu(id, r, basis, pts, extra) {
+    return `<div class="meta">${pts}${extra}${r.why.length ? `<button class="why" type="button" data-why="${id}" aria-expanded="false">${icon('eye')}Why</button>` : ''}${basis}</div>`;
+  }
   function reasonLi(r, mode = 'one') {
     const id = (mode === 'one' ? 'w' : 'cw') + (++counter[mode]); WHY[id] = { why: r.why, mode };
     const tone = r.tone ? ` t-${r.tone}` : '';
     const ok = r.ok === undefined ? '' : `<span class="mark ${r.ok ? 'ok' : 'no'}" aria-label="${r.ok ? 'met' : 'not met'}">${r.ok ? '✓' : '✗'}</span> `;
     const pts = r.pts === undefined ? '' : `<span class="pts ${r.pts > 0 ? 'pos' : r.pts < 0 ? 'neg' : 'zero'}">${r.pts > 0 ? '+' : r.pts < 0 ? '−' : '±'}${Math.abs(r.pts)}</span>`;
-    const basis = r.basis === 'own'
-      ? `<span class="basis own" title="My own weighting or threshold. Less certain; treat as a guide.">${icon('scale')}My weighting</span>`
-      : `<span class="basis std" title="A mainstream classical BaZi rule.">${icon('check')}Standard rule</span>`;
+    const basis = basisTag(r);
     if (r.caveat) return `<li class="caveat">${esc(r.text)}</li>`;
     const body = r.plain ? `${rich(r.plain)}</div>${r.tip ? `<div class="gtip"><b>Try:</b> ${esc(r.tip)}</div>` : ''}${r.when ? `<div class="gwhen">${icon('clock')}${esc(r.when)}</div>` : ''}<div class="gtech">${esc(r.text)}</div>` : `${rich(r.text)}</div>`;
     return `<li class="${tone}${r.fitStat && r.fitStat.y / r.fitStat.n < 0.4 ? ' lowfit' : ''}"><div class="rline">${r.title ? `<b>${esc(r.title)}.</b> ` : ''}${ok}${body}
-      <div class="meta">${pts}${r.fitStat ? (q => `<span class="fstat ${q < 0.4 ? 'lo' : q >= 0.7 ? 'hi' : ''}" title="Marks from everyone you have added">${q < 0.4 ? 'Often off for your people' : q >= 0.7 ? 'Fits your people' : 'Mixed for your people'} · ${r.fitStat.y}/${r.fitStat.n}</span>`)(r.fitStat.y / r.fitStat.n) : ''}${r.fitKey ? `<span class="rfit" role="group" aria-label="Does this fit?"><button type="button" data-rfit="${r.fitKey}" data-v="y" aria-pressed="${r.fitVal === 'y'}">✓ Fits</button><button type="button" data-rfit="${r.fitKey}" data-v="n" aria-pressed="${r.fitVal === 'n'}">✗ Doesn't fit</button></span>` : ''}${r.why.length ? `<button class="why" type="button" data-why="${id}" aria-expanded="false">${icon('eye')}Why</button>` : ''}${basis}</div>
+      ${moreMenu(id, r, basis, pts, (r.fitStat ? (q => `<span class="fstat ${q < 0.4 ? 'lo' : q >= 0.7 ? 'hi' : ''}" title="Marks from everyone you have added">${q < 0.4 ? 'Often off for your people' : q >= 0.7 ? 'Fits your people' : 'Mixed for your people'} · ${r.fitStat.y}/${r.fitStat.n}</span>`)(r.fitStat.y / r.fitStat.n) : '') + (r.fitKey ? `<span class="rfit" role="group" aria-label="Does this fit?"><button type="button" data-rfit="${r.fitKey}" data-v="y" aria-pressed="${r.fitVal === 'y'}">✓ Fits</button><button type="button" data-rfit="${r.fitKey}" data-v="n" aria-pressed="${r.fitVal === 'n'}">✗ Doesn't fit</button></span>` : ''))}
       <div class="whybox" id="${id}" hidden></div></li>`;
   }
   // plain-language item for the compatibility guide: everyday sentence first, the rule in small print
@@ -12342,12 +12389,10 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     const id = 'cw' + (++counter.two); WHY[id] = { why: r.why, mode: 'two' };
     const tone = r.tone ? ` t-${r.tone}` : '';
     const pts = r.pts === undefined ? '' : `<span class="pts ${r.pts > 0 ? 'pos' : r.pts < 0 ? 'neg' : 'zero'}">${r.pts > 0 ? '+' : r.pts < 0 ? '−' : '±'}${Math.abs(r.pts)}</span>`;
-    const basis = r.basis === 'own'
-      ? `<span class="basis own" title="My own weighting or threshold. Less certain; treat as a guide.">${icon('scale')}My weighting</span>`
-      : `<span class="basis std" title="A mainstream classical BaZi rule.">${icon('check')}Standard rule</span>`;
+    const basis = basisTag(r);
     const tech = r.plain !== r.text ? `<div class="gtech">${esc(r.text)}</div>` : '';
     return `<li class="${tone}"><div class="rline">${esc(r.plain)}</div>${r.tip ? `<div class="gtip"><b>Try:</b> ${esc(r.tip)}</div>` : ''}${tech}
-      <div class="meta">${pts}${r.why.length ? `<button class="why" type="button" data-why="${id}" aria-expanded="false">${icon('eye')}Why</button>` : ''}${basis}</div>
+      ${moreMenu(id, r, basis, pts, '')}
       <div class="whybox" id="${id}" hidden></div></li>`;
   }
   let posOne = {}, posTwo = { A: {}, B: {} }, nickTwo = { A: '', B: '' };
@@ -12530,10 +12575,19 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     sec.classList.toggle('closed', !open); const b = sec.querySelector(':scope > .foldbtn'); if (b) { b.setAttribute('aria-expanded', open); b.setAttribute('aria-label', (open ? 'Hide ' : 'Show ') + $(h).textContent.trim()); }
     if (open) enter(sec); }
   document.addEventListener('click', e => {
-    const f = e.target.closest && e.target.closest('[data-fold]'); if (f) return setFold(f.dataset.fold, f.getAttribute('aria-expanded') !== 'true');
+    const f = e.target.closest && e.target.closest('[data-fold]'); if (f) tick(); if (f) return setFold(f.dataset.fold, f.getAttribute('aria-expanded') !== 'true');
     // tapping a folded section's title opens it too
     const h = e.target.closest && e.target.closest('section.fold.closed h2'); if (h) return setFold(h.id, true);
   });
+  // close any open sheet: tap the dimmed backdrop, or swipe a sheet down
+  function closeSheets() { $('jump').classList.remove('open'); document.querySelectorAll('.info:not([hidden])').forEach(b => { const x = b.querySelector('.x'); if (x) x.click(); else b.hidden = true; }); }
+  $('sheetbg').addEventListener('click', closeSheets);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheets(); });
+  (() => { let y0 = null, el = null;
+    document.addEventListener('touchstart', e => { el = e.target.closest && e.target.closest('.info:not([hidden])'); y0 = el && el.scrollTop <= 0 && innerWidth <= 700 ? e.touches[0].clientY : null; }, { passive: true });
+    document.addEventListener('touchmove', e => { if (y0 === null || !el) return; const dy = e.touches[0].clientY - y0; if (dy > 0) { el.style.transform = `translateY(${dy}px)`; el.style.transition = 'none'; } }, { passive: true });
+    document.addEventListener('touchend', e => { if (y0 === null || !el) return; const dy = (e.changedTouches[0] || {}).clientY - y0; el.style.transition = 'transform .2s'; el.style.transform = ''; if (dy > 90) { tick(); const x = el.querySelector('.x'); if (x) x.click(); else el.hidden = true; } y0 = null; el = null; });
+  })();
   function renderJump() {
     applyFolds();
     const secs = [...document.querySelectorAll('#vProfile section.card')].filter(x => !x.hidden && x.querySelector('h2'));
@@ -13350,7 +13404,7 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     const mr = e.target.closest('[data-month]'); if (mr) { const i = +mr.dataset.month; view.month = view.month === i ? null : i; const p = byId(view.id), { chart: c, reading: r } = chartOf(p); return renderMonths(c, r); }
     const pc = e.target.closest('[data-py]'); if (pc) return showPairYear(+pc.dataset.py);
     const fb = e.target.closest('[data-fit]'); if (fb) { const p = byId(view.id), yf = Object.assign({}, p.yearFit || {}); if (yf[view.year] === fb.dataset.fit) delete yf[view.year]; else yf[view.year] = fb.dataset.fit; commit(ST.upsert(db, { id: p.id, yearFit: yf }).db); const q = byId(view.id), { chart: c, reading: r } = chartOf(q); renderYearDetail(q, c, r); renderAccuracy(q, c, r); return; }
-    const rf = e.target.closest('[data-rfit]'); if (rf) { const p = byId(view.id); if (!p) return; const m = Object.assign({}, p.readFit || {}), k = rf.dataset.rfit; if (m[k] === rf.dataset.v) delete m[k]; else m[k] = rf.dataset.v; commit(ST.upsert(db, { id: p.id, readFit: m }).db); rf.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', m[k] === b.dataset.v)); return renderFitSummary(byId(view.id)); }
+    const rf = e.target.closest('[data-rfit]'); if (rf) { tick(); const p = byId(view.id); if (!p) return; const m = Object.assign({}, p.readFit || {}), k = rf.dataset.rfit; if (m[k] === rf.dataset.v) delete m[k]; else m[k] = rf.dataset.v; commit(ST.upsert(db, { id: p.id, readFit: m }).db); rf.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', m[k] === b.dataset.v)); return renderFitSummary(byId(view.id)); }
     const hr = e.target.closest('[data-hour]'); if (hr) { const k = +hr.dataset.hour; view.hourSel = view.hourSel === k ? null : k; return renderHours(byId(view.id)); }
     const dy = e.target.closest('[data-day]'); if (dy) { view.calSel = +dy.dataset.day; document.querySelectorAll('#cal button').forEach(b => b.classList.toggle('sel', b === dy)); return showDay(lastDays[view.calSel]); }
     const rb = e.target.closest('[data-rel]'); if (rb) { const cur = relGet(view.a, view.b) || {}; relSet(view.a, view.b, Object.assign({}, cur, { type: rb.dataset.rel })); return renderCompare(); }
@@ -13477,10 +13531,10 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
   const lookName = n => window.BAZI_LANG === 'en' ? n.replace(/\s*[\u3400-\u9fff]+$/, '') : window.BAZI_LANG === 'zh' ? n.replace(/^.*\s(?=[\u3400-\u9fff]+$)/, '') : n; // names are 'English 中文'
   // light / dark / auto, separate from the theme
   function drawModes() { const m = window.getMode ? window.getMode() : 'auto'; document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m)); }
-  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#modeSeg [data-mode]'); if (!b || !window.setMode) return; window.setMode(b.dataset.mode); drawModes(); });
+  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#modeSeg [data-mode]'); if (!b || !window.setMode) return; tick(); window.setMode(b.dataset.mode); drawModes(); });
   function renderAccents() { const A = window.BAZI_ACCENTS || {}, cur = window.BAZI_ACCENT || 'auto'; $('accentSw').innerHTML = Object.entries(A).map(([k, a]) => `<button type="button" class="sw${k === cur ? ' on' : ''}" data-accent="${k}" style="--c:${a[0]}" aria-pressed="${k === cur}" title="${lookName(a[1])}"><span></span><small>${lookName(a[1])}</small></button>`).join(''); drawModes(); }
   renderAccents();
-  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#accentSw [data-accent]'); if (!b || !window.setAccent) return; window.setAccent(b.dataset.accent); renderAccents(); });
+  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#accentSw [data-accent]'); if (!b || !window.setAccent) return; tick(); window.setAccent(b.dataset.accent); renderAccents(); });
   document.querySelectorAll('[data-setlang]').forEach(a => a.setAttribute('aria-pressed', a.dataset.setlang === (window.BAZI_LANG || 'mix')));
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-setlang]'); if (!b) return; try { localStorage.setItem('bazi.lang.v1', b.dataset.setlang); } catch (er) { } location.reload(); });
   applyOptions(); calibrate();
@@ -13748,6 +13802,7 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     </div>
     <section class="card report" id="reportBody"></section>
   </main>
+  <div class="sheetbg" id="sheetbg" aria-hidden="true"></div>
   <div id="tour" class="tour" hidden role="dialog" aria-live="polite" aria-labelledby="tourH">
     <div class="tour-in"><small class="muted" id="tourN"></small><h2 id="tourH" style="font-size:1.05rem"></h2><p id="tourT" class="small"></p>
       <div class="btnrow"><button class="btn small" type="button" data-act="tourBack" id="tourBack">返回</button><button class="btn accent small" type="button" data-act="tourNext" id="tourNext">下一步</button><button class="btn small" type="button" data-act="tourEnd">跳过</button></div></div>
@@ -16366,6 +16421,8 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
   const icon = (n, cls = '') => `<svg class="ic${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="#i-${n}"></use></svg>`;
   const EL_ICON = ['leaf', 'flame', 'mountain', 'coin', 'drop'];
   const reduced = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+  // light haptic tap where the device supports it (Android); silent elsewhere
+  const tick = () => { try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) { } };
   function enter(el) { if (!el) return; el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
   function toast(msg, kind = 'ok') {
     const t = document.createElement('div'); t.className = 'toast' + (kind === 'err' ? ' err' : '');
@@ -16588,18 +16645,23 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     if (!rows.length) return '';
     return `<h3 style="font-size:.95rem;margin:10px 0 4px">已标记的解读</h3><ul class="small">${rows.map(x => `<li><b>${x.label} <span class="zh">${x.z}</span></b>：${x.n}条中${x.y}条相符（${Math.round(x.y / x.n * 100)}%）${x.n >= 5 && x.y / x.n < 0.5 ? ' · <span style="color:var(--bad)">对你的人常不准</span>' : ''}</li>`).join('')}</ul>`;
   }
+  function basisTag(r) { return r.basis === 'own'
+      ? `<span class="basis own" title="The app's own weighting or threshold: less certain, treat as a guide.">${icon('scale')}本应用权重</span>`
+      : `<span class="basis std" title="A mainstream classical BaZi rule.">${icon('check')}传统规则</span>`; }
+  // the point's extras sit in one row under the text: fit marks, Why, and the rule type
+  function moreMenu(id, r, basis, pts, extra) {
+    return `<div class="meta">${pts}${extra}${r.why.length ? `<button class="why" type="button" data-why="${id}" aria-expanded="false">${icon('eye')}依据</button>` : ''}${basis}</div>`;
+  }
   function reasonLi(r, mode = 'one') {
     const id = (mode === 'one' ? 'w' : 'cw') + (++counter[mode]); WHY[id] = { why: r.why, mode };
     const tone = r.tone ? ` t-${r.tone}` : '';
     const ok = r.ok === undefined ? '' : `<span class="mark ${r.ok ? 'ok' : 'no'}" aria-label="${r.ok ? 'met' : '未满足'}">${r.ok ? '✓' : '✗'}</span> `;
     const pts = r.pts === undefined ? '' : `<span class="pts ${r.pts > 0 ? 'pos' : r.pts < 0 ? 'neg' : 'zero'}">${r.pts > 0 ? '+' : r.pts < 0 ? '−' : '±'}${Math.abs(r.pts)}</span>`;
-    const basis = r.basis === 'own'
-      ? `<span class="basis own" title="My own weighting or threshold. Less certain; treat as a guide.">${icon('scale')}自定权重</span>`
-      : `<span class="basis std" title="A mainstream classical BaZi rule.">${icon('check')}传统规则</span>`;
+    const basis = basisTag(r);
     if (r.caveat) return `<li class="caveat">${esc(r.text)}</li>`;
     const body = r.plain ? `${rich(r.plain)}</div>${r.tip ? `<div class="gtip"><b>建议：</b> ${esc(r.tip)}</div>` : ''}${r.when ? `<div class="gwhen">${icon('clock')}${esc(r.when)}</div>` : ''}<div class="gtech">${esc(r.text)}</div>` : `${rich(r.text)}</div>`;
     return `<li class="${tone}${r.fitStat && r.fitStat.y / r.fitStat.n < 0.4 ? ' lowfit' : ''}"><div class="rline">${r.title ? `<b>${esc(r.title)}：</b> ` : ''}${ok}${body}
-      <div class="meta">${pts}${r.fitStat ? (q => `<span class="fstat ${q < 0.4 ? 'lo' : q >= 0.7 ? 'hi' : ''}" title="Marks from everyone you have added">${q < 0.4 ? '对你的人常不准' : q >= 0.7 ? '对你的人很准' : '对你的人时准时不准'} · ${r.fitStat.y}/${r.fitStat.n}</span>`)(r.fitStat.y / r.fitStat.n) : ''}${r.fitKey ? `<span class="rfit" role="group" aria-label="Does this fit?"><button type="button" data-rfit="${r.fitKey}" data-v="y" aria-pressed="${r.fitVal === 'y'}">✓ 相符</button><button type="button" data-rfit="${r.fitKey}" data-v="n" aria-pressed="${r.fitVal === 'n'}">✗ 不符</button></span>` : ''}${r.why.length ? `<button class="why" type="button" data-why="${id}" aria-expanded="false">${icon('eye')}依据</button>` : ''}${basis}</div>
+      ${moreMenu(id, r, basis, pts, (r.fitStat ? (q => `<span class="fstat ${q < 0.4 ? 'lo' : q >= 0.7 ? 'hi' : ''}" title="Marks from everyone you have added">${q < 0.4 ? '对你的人常不准' : q >= 0.7 ? '对你的人很准' : '对你的人时准时不准'} · ${r.fitStat.y}/${r.fitStat.n}</span>`)(r.fitStat.y / r.fitStat.n) : '') + (r.fitKey ? `<span class="rfit" role="group" aria-label="Does this fit?"><button type="button" data-rfit="${r.fitKey}" data-v="y" aria-pressed="${r.fitVal === 'y'}">✓ 相符</button><button type="button" data-rfit="${r.fitKey}" data-v="n" aria-pressed="${r.fitVal === 'n'}">✗ 不符</button></span>` : ''))}
       <div class="whybox" id="${id}" hidden></div></li>`;
   }
   // plain-language item for the compatibility guide: everyday sentence first, the rule in small print
@@ -16607,12 +16669,10 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     const id = 'cw' + (++counter.two); WHY[id] = { why: r.why, mode: 'two' };
     const tone = r.tone ? ` t-${r.tone}` : '';
     const pts = r.pts === undefined ? '' : `<span class="pts ${r.pts > 0 ? 'pos' : r.pts < 0 ? 'neg' : 'zero'}">${r.pts > 0 ? '+' : r.pts < 0 ? '−' : '±'}${Math.abs(r.pts)}</span>`;
-    const basis = r.basis === 'own'
-      ? `<span class="basis own" title="My own weighting or threshold. Less certain; treat as a guide.">${icon('scale')}自定权重</span>`
-      : `<span class="basis std" title="A mainstream classical BaZi rule.">${icon('check')}传统规则</span>`;
+    const basis = basisTag(r);
     const tech = r.plain !== r.text ? `<div class="gtech">${esc(r.text)}</div>` : '';
     return `<li class="${tone}"><div class="rline">${esc(r.plain)}</div>${r.tip ? `<div class="gtip"><b>建议：</b> ${esc(r.tip)}</div>` : ''}${tech}
-      <div class="meta">${pts}${r.why.length ? `<button class="why" type="button" data-why="${id}" aria-expanded="false">${icon('eye')}依据</button>` : ''}${basis}</div>
+      ${moreMenu(id, r, basis, pts, '')}
       <div class="whybox" id="${id}" hidden></div></li>`;
   }
   let posOne = {}, posTwo = { A: {}, B: {} }, nickTwo = { A: '', B: '' };
@@ -16671,7 +16731,7 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
 
     $('pillars').innerHTML = ['year', 'month', 'day', 'hour'].map((pal, i) => {
       const x = c.pillars[i];
-      const head = `<div class="head"><span class="zh">${PALACE[pal][2]}</span>${PALACE[pal][0]}<span>${PALACE[pal][1]}</span></div>`;
+      const head = `<div class="head">${PALACE[pal][0]}<span>${PALACE[pal][1]}</span></div>`;
       if (!x) return `<div class="p missing">${head}<div class="gap">不详<br>time<br>时辰不详</div></div>`;
       const st = E.STEMS[x.stem], br = E.BRANCHES[x.branch];
       const sg = x.stemGod === 'DM' ? '日主' : GOD_ZH[x.stemGod];
@@ -16694,7 +16754,7 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     const row = (k, v) => `<div class="dr"><span class="dk">${k}</span><span class="dv">${v}</span></div>`;
     $('detail').innerHTML = c.pillars.map((x, i) => {
       const pal = ['year', 'month', 'day', 'hour'][i];
-      const head = `<div class="dh"><b>${PALACE[pal][0]} <span class="zh">${PALACE[pal][2]}</span></b>${x ? `<span class="zh dz">${x.zh}</span>` : ''}</div>`;
+      const head = `<div class="dh"><b>${PALACE[pal][0]}</b>${x ? `<span class="zh dz">${x.zh}</span>` : ''}</div>`;
       if (!x) return `<div class="dcard">${head}<p class="muted small">出生时间不详。</p></div>`;
       const n = XT.nayin(x.stem, x.branch), rl = rel[x.palace];
       return `<div class="dcard">${head}
@@ -16797,10 +16857,19 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     sec.classList.toggle('closed', !open); const b = sec.querySelector(':scope > .foldbtn'); if (b) { b.setAttribute('aria-expanded', open); b.setAttribute('aria-label', (open ? '收起' : '展开') + $(h).textContent.trim()); }
     if (open) enter(sec); }
   document.addEventListener('click', e => {
-    const f = e.target.closest && e.target.closest('[data-fold]'); if (f) return setFold(f.dataset.fold, f.getAttribute('aria-expanded') !== 'true');
+    const f = e.target.closest && e.target.closest('[data-fold]'); if (f) tick(); if (f) return setFold(f.dataset.fold, f.getAttribute('aria-expanded') !== 'true');
     // tapping a folded section's title opens it too
     const h = e.target.closest && e.target.closest('section.fold.closed h2'); if (h) return setFold(h.id, true);
   });
+  // close any open sheet: tap the dimmed backdrop, or swipe a sheet down
+  function closeSheets() { $('jump').classList.remove('open'); document.querySelectorAll('.info:not([hidden])').forEach(b => { const x = b.querySelector('.x'); if (x) x.click(); else b.hidden = true; }); }
+  $('sheetbg').addEventListener('click', closeSheets);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheets(); });
+  (() => { let y0 = null, el = null;
+    document.addEventListener('touchstart', e => { el = e.target.closest && e.target.closest('.info:not([hidden])'); y0 = el && el.scrollTop <= 0 && innerWidth <= 700 ? e.touches[0].clientY : null; }, { passive: true });
+    document.addEventListener('touchmove', e => { if (y0 === null || !el) return; const dy = e.touches[0].clientY - y0; if (dy > 0) { el.style.transform = `translateY(${dy}px)`; el.style.transition = 'none'; } }, { passive: true });
+    document.addEventListener('touchend', e => { if (y0 === null || !el) return; const dy = (e.changedTouches[0] || {}).clientY - y0; el.style.transition = 'transform .2s'; el.style.transform = ''; if (dy > 90) { tick(); const x = el.querySelector('.x'); if (x) x.click(); else el.hidden = true; } y0 = null; el = null; });
+  })();
   function renderJump() {
     applyFolds();
     const secs = [...document.querySelectorAll('#vProfile section.card')].filter(x => !x.hidden && x.querySelector('h2'));
@@ -17381,7 +17450,7 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     [['A', A], ['B', B]].forEach(([w, d]) => { d.chart.pillars.forEach(x => { if (x) posTwo[w][x.palace] = x; }); if (d.reading.current.luck) posTwo[w].luck = d.reading.current.luck; });
     resetWhy('two');
     const same = pa.id === pb.id;
-    const hd = '<div></div>' + ['year', 'month', 'day', 'hour'].map(k => `<div class="hd"><span class="zh">${PALACE[k][2]}</span>${PALACE[k][0]}</div>`).join('');
+    const hd = '<div></div>' + ['year', 'month', 'day', 'hour'].map(k => `<div class="hd">${PALACE[k][0]}</div>`).join('');
     const who = (w, d) => { const dm = E.STEMS[d.chart.dayMaster]; return `<div class="who"><span class="tag${w === 'B' ? ' b' : ''}">${w}</span>${esc(res.nick[w])}<small>${dm.zh} ${yy(dm.yang)} ${ELT(dm.el)} · ${d.reading.strength.zh}</small></div>`; };
     const cell = (w, k, part) => { const P = posTwo[w][k]; if (!P) return ''; const x = part === 'stem' ? E.STEMS[P.stem] : E.BRANCHES[P.branch]; return `<div class="c e-${EL(x.el)}" data-pos="${w}-${k}-${part}">${x.zh}<small>${part === 'stem' ? EL_ZH[x.el] : x.animal}</small></div>`; };
     const row = (w, d, branchFirst) => who(w, d) + ['year', 'month', 'day', 'hour'].map(k => posTwo[w][k] ? `<div class="pc${k === 'day' ? ' dm' : ''}">${branchFirst ? cell(w, k, 'branch') + cell(w, k, 'stem') : cell(w, k, 'stem') + cell(w, k, 'branch')}</div>` : '<div class="pc none">?</div>').join('');
@@ -17617,7 +17686,7 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
     const mr = e.target.closest('[data-month]'); if (mr) { const i = +mr.dataset.month; view.month = view.month === i ? null : i; const p = byId(view.id), { chart: c, reading: r } = chartOf(p); return renderMonths(c, r); }
     const pc = e.target.closest('[data-py]'); if (pc) return showPairYear(+pc.dataset.py);
     const fb = e.target.closest('[data-fit]'); if (fb) { const p = byId(view.id), yf = Object.assign({}, p.yearFit || {}); if (yf[view.year] === fb.dataset.fit) delete yf[view.year]; else yf[view.year] = fb.dataset.fit; commit(ST.upsert(db, { id: p.id, yearFit: yf }).db); const q = byId(view.id), { chart: c, reading: r } = chartOf(q); renderYearDetail(q, c, r); renderAccuracy(q, c, r); return; }
-    const rf = e.target.closest('[data-rfit]'); if (rf) { const p = byId(view.id); if (!p) return; const m = Object.assign({}, p.readFit || {}), k = rf.dataset.rfit; if (m[k] === rf.dataset.v) delete m[k]; else m[k] = rf.dataset.v; commit(ST.upsert(db, { id: p.id, readFit: m }).db); rf.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', m[k] === b.dataset.v)); return renderFitSummary(byId(view.id)); }
+    const rf = e.target.closest('[data-rfit]'); if (rf) { tick(); const p = byId(view.id); if (!p) return; const m = Object.assign({}, p.readFit || {}), k = rf.dataset.rfit; if (m[k] === rf.dataset.v) delete m[k]; else m[k] = rf.dataset.v; commit(ST.upsert(db, { id: p.id, readFit: m }).db); rf.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', m[k] === b.dataset.v)); return renderFitSummary(byId(view.id)); }
     const hr = e.target.closest('[data-hour]'); if (hr) { const k = +hr.dataset.hour; view.hourSel = view.hourSel === k ? null : k; return renderHours(byId(view.id)); }
     const dy = e.target.closest('[data-day]'); if (dy) { view.calSel = +dy.dataset.day; document.querySelectorAll('#cal button').forEach(b => b.classList.toggle('sel', b === dy)); return showDay(lastDays[view.calSel]); }
     const rb = e.target.closest('[data-rel]'); if (rb) { const cur = relGet(view.a, view.b) || {}; relSet(view.a, view.b, Object.assign({}, cur, { type: rb.dataset.rel })); return renderCompare(); }
@@ -17744,10 +17813,10 @@ ol.ya > li.supportive { border-left-color: var(--good); } ol.ya > li.challenging
   const lookName = n => window.BAZI_LANG === 'en' ? n.replace(/\s*[\u3400-\u9fff]+$/, '') : window.BAZI_LANG === 'zh' ? n.replace(/^.*\s(?=[\u3400-\u9fff]+$)/, '') : n; // names are 'English 中文'
   // light / dark / auto, separate from the theme
   function drawModes() { const m = window.getMode ? window.getMode() : 'auto'; document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m)); }
-  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#modeSeg [data-mode]'); if (!b || !window.setMode) return; window.setMode(b.dataset.mode); drawModes(); });
+  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#modeSeg [data-mode]'); if (!b || !window.setMode) return; tick(); window.setMode(b.dataset.mode); drawModes(); });
   function renderAccents() { const A = window.BAZI_ACCENTS || {}, cur = window.BAZI_ACCENT || 'auto'; $('accentSw').innerHTML = Object.entries(A).map(([k, a]) => `<button type="button" class="sw${k === cur ? ' on' : ''}" data-accent="${k}" style="--c:${a[0]}" aria-pressed="${k === cur}" title="${lookName(a[1])}"><span></span><small>${lookName(a[1])}</small></button>`).join(''); drawModes(); }
   renderAccents();
-  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#accentSw [data-accent]'); if (!b || !window.setAccent) return; window.setAccent(b.dataset.accent); renderAccents(); });
+  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#accentSw [data-accent]'); if (!b || !window.setAccent) return; tick(); window.setAccent(b.dataset.accent); renderAccents(); });
   document.querySelectorAll('[data-setlang]').forEach(a => a.setAttribute('aria-pressed', a.dataset.setlang === (window.BAZI_LANG || 'mix')));
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-setlang]'); if (!b) return; try { localStorage.setItem('bazi.lang.v1', b.dataset.setlang); } catch (er) { } location.reload(); });
   applyOptions(); calibrate();
