@@ -198,7 +198,6 @@ textarea { font: inherit; font-size: .95rem; color: var(--ink); background: var(
 ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: .9rem; }
 code { font-size: .85em; background: var(--bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
 .ic { width: 1.15em; height: 1.15em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.2em; }
-.ic.lg { width: 1.4em; height: 1.4em; }
 h2 .ic { color: var(--accent); margin-right: 6px; }
 .tabs button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background .2s, color .2s; }
 .tabs button[aria-selected="true"] { background: var(--accent); color: var(--surface); box-shadow: 0 2px 8px -3px color-mix(in srgb, var(--accent) 70%, transparent); }
@@ -264,13 +263,6 @@ h2 .ic { color: var(--accent); margin-right: 6px; }
 .ydetail .glyph { font-family: var(--han); font-size: 1.8rem; line-height: 1; padding: 6px 10px; border-radius: 10px; }
 .flags { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .months { display: grid; gap: 6px; }
-.mrow { display: grid; grid-template-columns: 92px 44px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); cursor: pointer; font: inherit; color: var(--ink); text-align: left; width: 100%; }
-.mrow.now { border: 2px solid var(--accent); }
-.mrow.sel { background: var(--accent-soft); }
-.mrow .md { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.mrow .zh { font-size: 1.05rem; font-weight: 600; }
-.mrow .mt { font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mrow .mi { display: flex; gap: 3px; color: var(--muted); }
 .mdetail { margin: -2px 0 4px; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; padding: 3px; gap: 3px; background: var(--bg); }
 .seg button { font: inherit; font-size: .85rem; font-weight: 600; border: 0; border-radius: 7px; padding: 6px 12px; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
@@ -295,7 +287,7 @@ table.grid tr[data-pair]:hover td { background: var(--accent-soft); }
 .report .rp div { border: 1px solid var(--line); border-radius: 8px; padding: 6px 0; font-family: var(--han); font-size: 1.3rem; line-height: 1.3; }
 .report .rp small { display: block; font-family: var(--body); font-size: .68rem; color: var(--muted); }
 @media print { .topbar, .noprint, footer, .toasts { display: none !important; } .card { border: 0; padding: 0; } body { background: #fff; } }
-@media (prefers-reduced-motion: no-preference) { .ystrip.enter .ychip, .pstrip.enter .pchip, .months.enter .mrow { animation: rise .35s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 35ms); } }
+@media (prefers-reduced-motion: no-preference) { .ystrip.enter .ychip, .pstrip.enter .pchip { animation: rise .35s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 35ms); } }
 .meta { flex-wrap: wrap; gap: 8px; }
 .basis { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 700; padding: 2px 9px 2px 7px; border-radius: 99px; border: 1px solid transparent; white-space: nowrap; }
 .basis .ic { width: .95em; height: .95em; stroke-width: 2.2; }
@@ -13564,7 +13556,7 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#modeSeg [data-mode]'); if (!b || !window.setMode) return; tick(); window.setMode(b.dataset.mode); drawModes(); });
   // "Last updated": the time GitHub Pages published this file (its Last-Modified), else the time it was built
   (() => { let t = new Date(document.lastModified); const now = Date.now();
-    if (location.protocol !== 'https:' || isNaN(t) || Math.abs(now - t) < 60000) t = new Date(1792421565848);
+    if (location.protocol !== 'https:' || isNaN(t) || Math.abs(now - t) < 60000) t = new Date(1792422146949);
     const p = n => String(n).padStart(2, '0'), M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     $('updated').textContent = window.BAZI_LANG === 'zh' ? `最后更新：${t.getFullYear()}年${t.getMonth() + 1}月${t.getDate()}日 ${p(t.getHours())}:${p(t.getMinutes())}`
       : `Last updated on ${p(t.getHours())}:${p(t.getMinutes())} ${t.getDate()} ${M[t.getMonth()]} ${t.getFullYear()}`; })();
@@ -17852,7 +17844,7 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#modeSeg [data-mode]'); if (!b || !window.setMode) return; tick(); window.setMode(b.dataset.mode); drawModes(); });
   // "Last updated": the time GitHub Pages published this file (its Last-Modified), else the time it was built
   (() => { let t = new Date(document.lastModified); const now = Date.now();
-    if (location.protocol !== 'https:' || isNaN(t) || Math.abs(now - t) < 60000) t = new Date(1792421565848);
+    if (location.protocol !== 'https:' || isNaN(t) || Math.abs(now - t) < 60000) t = new Date(1792422146949);
     const p = n => String(n).padStart(2, '0'), M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     $('updated').textContent = window.BAZI_LANG === 'zh' ? `最后更新：${t.getFullYear()}年${t.getMonth() + 1}月${t.getDate()}日 ${p(t.getHours())}:${p(t.getMinutes())}`
       : `Last updated on ${p(t.getHours())}:${p(t.getMinutes())} ${t.getDate()} ${M[t.getMonth()]} ${t.getFullYear()}`; })();
