@@ -264,7 +264,7 @@ h2 .ic { color: var(--accent); margin-right: 6px; }
 .flags { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .months { display: grid; gap: 6px; }
 .mdetail { margin: -2px 0 4px; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; padding: 3px; gap: 3px; background: var(--bg); }
+.seg { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: var(--r-pill); padding: 3px; gap: 3px; background: var(--bg); }
 .seg button { font: inherit; font-size: .85rem; font-weight: 600; border: 0; border-radius: 7px; padding: 6px 12px; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgb(0 0 0 / .08); }
 .pstrip { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; }
@@ -299,22 +299,25 @@ table.grid tr[data-pair]:hover td { background: var(--accent-soft); }
 /* app shell */
 .topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding: 10px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); }
 .titlerow h1 { font-size: 1.25rem; }
-.appnav button { flex-direction: row; }
-.appnav .tz { font-size: .8em; opacity: .85; }
+/* one nav look on every screen: icon above label, soft pill for the selected tab */
+.appnav { border-radius: 18px; padding: 5px; }
+.appnav button { flex-direction: column; gap: 1px; padding: 6px 2px; min-height: 54px; font-size: .72rem; line-height: 1.15; }
+.appnav button .ic { width: 1.45em; height: 1.45em; margin-bottom: 2px; }
+.appnav .tl { font-weight: 700; white-space: nowrap; }
+.appnav .tz { font-size: .68rem; font-weight: 500; }
+.appnav button { position: relative; color: var(--muted); border-radius: 13px; }
+.appnav button[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 22%, var(--surface)) !important; color: var(--accent); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent) !important; }
+.appnav button[aria-selected="true"] .tz { color: var(--accent); opacity: 1; }
+.appnav button[aria-selected="true"] .ic { background: var(--accent); color: var(--surface); border-radius: 99px; width: 2.6em; padding: 2px 0; box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--accent) 60%, transparent); }
+.appnav button[aria-selected="true"] .tl { color: var(--accent); }
+.appnav button { gap: 2px; padding: 8px 4px; min-height: 62px; font-size: .8rem; }
+.appnav .tz { font-size: .72rem; opacity: .85; }
 @media (max-width: 720px) {
   .wrap { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
   .appnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; border-radius: 0; border: 0; border-top: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 6px max(8px, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-right, 0px)); gap: 2px; }
-  .appnav button { flex-direction: column; gap: 1px; padding: 6px 2px; min-height: 54px; font-size: .72rem; line-height: 1.15; }
-  .appnav button .ic { width: 1.45em; height: 1.45em; margin-bottom: 2px; }
-  .appnav .tl { font-weight: 700; white-space: nowrap; }
-  .appnav .tz { font-size: .68rem; font-weight: 500; }
-  .appnav button { position: relative; color: var(--muted); border-radius: 14px; }
-  .appnav button[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 22%, var(--surface)) !important; color: var(--accent); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent) !important; }
-  .appnav button[aria-selected="true"] .tz { color: var(--accent); opacity: 1; }
-  .appnav button[aria-selected="true"] .ic { background: var(--accent); color: var(--surface); border-radius: 99px; width: 2.6em; padding: 2px 0; box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--accent) 60%, transparent); }
-  .appnav button[aria-selected="true"] .tl { color: var(--accent); }
+  .appnav button { padding: 6px 2px; min-height: 54px; font-size: .72rem; gap: 1px; }
+  .appnav .tz { font-size: .68rem; }
   .titlerow h1 .zh { display: none; }
-  .toasts { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }
 /* year expectations and event checklist */
 .exp { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -521,6 +524,7 @@ ol.checks b { font-size: .92rem; }
 .mlists div { border-radius: 9px; padding: 8px 10px; font-size: .86rem; }
 .mlists .g { background: var(--good-soft); } .mlists .w { background: var(--warn-soft); }
 .mlists ul { margin: 4px 0 0; padding-left: 18px; }
+.bubble.bot .mlists { margin: 22px 0 12px; } .bubble.bot .mlists div { padding: 10px 12px; } .bubble.bot .mlists + p { margin-top: 0; } .bubble.bot .btnrow { margin-top: 12px; }
 .yearly { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; margin-left: 4px; }
 /* life stages */
 .stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -599,7 +603,7 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
 .search { position: relative; }
 .search .ic { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
 .search input { padding-left: 38px; }
-.toasts { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); display: grid; gap: 8px; z-index: 20; width: min(92vw, 420px); pointer-events: none; }
+.toasts { position: fixed; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: grid; gap: 8px; z-index: 60; width: min(92vw, 420px); pointer-events: none; }
 .toast { background: var(--ink); color: var(--bg); border-radius: 10px; padding: 10px 14px; font-size: .9rem; display: flex; gap: 8px; align-items: center; box-shadow: 0 6px 24px rgb(0 0 0 / .2); }
 .toast.err { background: var(--bad); color: var(--surface); }
 .pitem { transition: transform .15s, box-shadow .15s, border-color .15s; }
@@ -631,8 +635,8 @@ textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size
   .btn:active, .tabs button:active, .why:active, .tchip:active, button.primary:active { transform: scale(.97); }
   .toast { animation: toastIn .3s cubic-bezier(.2,.7,.2,1) both; }
   .toast.out { animation: toastOut .3s ease both; }
-  @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } }
-  @keyframes toastOut { to { opacity: 0; transform: translateY(12px); } }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-16px) scale(.97); } }
+  @keyframes toastOut { to { opacity: 0; transform: translateY(-16px) scale(.97); } }
   .tchip, .wheel .node circle.bgc { transition: background .2s, stroke-width .2s; }
 }
 /* plain-language compatibility guide */
@@ -754,8 +758,8 @@ ul.reasons > li.caveat { box-shadow: inset 3px 0 var(--warn); border-left: 0; }
 .meta { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-top: 8px; min-width: 0; }
 .meta .why, .rfit button { height: 30px; min-height: 30px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; position: relative; font-size: .78rem; }
 .meta .why::after, .rfit button::after { content: ''; position: absolute; inset: -7px -3px; } /* 44 pt tap area around a 30 pt pill */
-.meta .basis { background: none; border: 0; padding: 0; font-size: .72rem; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.meta .basis .ic { opacity: .7; }
+.meta .basis { height: 30px; padding: 0 11px 0 9px; border: 0; font-size: .72rem; font-weight: 600; flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.meta .basis .ic { opacity: .9; }
 .mfit { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .rfit { align-items: center; gap: 6px; }
 .rfq { font-size: .72rem; color: var(--muted); }
@@ -12944,6 +12948,7 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
     window.scrollTo({ top: q.getBoundingClientRect().top + scrollY - off, behavior: reduced ? 'auto' : 'smooth' }); }
   const capF = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
   const plainOf = x => x.plain || x.text;
+  const fmtD = d => { const t = new Date(d + 'T00:00:00'); return window.BAZI_LANG === 'zh' ? `${t.getMonth() + 1}月${t.getDate()}日` : `${t.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][t.getMonth()]}`; };
   // a "Don't …" tip read as a tendency to watch
   const tend = t => t.replace(/^Don't /, 'Tendency to ').replace(/^不要/, '容易').replace(/也不要/g, '也容易');
   const firstS = t => (String(t).match(/^.*?(?:\.(?=\s|$)|。)/) || [t])[0];
@@ -12961,23 +12966,23 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
       const hardA = a => !a.welcome && (a.loss || ['health', 'family'].includes(a.key) || /^(clash|harm|punish|tkdc|own|challenging|void)/.test(a.signals[0].id));
       const good = areas.filter(a => !hardA(a)), hard = areas.filter(hardA);
       const flagIds = v.flags.map(f => f.id);
-      const dos = uniq([`Use it for ${TM.GOOD_FOR[v.sg][0]}`, capF(TM.GOOD_FOR[v.sg][1]), ...flagIds.map(f => TM.DODONT[f] && TM.DODONT[f][0]), v.rating === 'supportive' ? 'Start the things you have been planning' : v.rating === 'challenging' ? 'Keep plans small, save and finish what is open' : '']).slice(0, 5);
+      const dos = uniq([`Good for ${TM.GOOD_FOR[v.sg][0]}`, `Also good for ${TM.GOOD_FOR[v.sg][1]}`, ...flagIds.map(f => TM.DODONT[f] && TM.DODONT[f][0]), v.rating === 'supportive' ? 'Start the things you have been planning' : v.rating === 'challenging' ? 'Keep plans small, save and finish what is open' : '']).slice(0, 5);
       const donts = uniq([TM.DONT_GOD[v.sg], ...flagIds.map(f => TM.DODONT[f] && TM.DODONT[f][1]), v.rating === 'challenging' ? 'Don\'t stake a lot on one big risk this year' : '']).slice(0, 4);
       const sec = id === 'year'
         ? [['What the year points to', areas.map(a => `<b>${a.name}</b> (${a.level}): ${a.signals[0].text}`)]]
         : [['Opportunities', good.map(a => `<b>${a.name}</b>: ${a.signals[0].text}`)], ['Challenges', hard.map(a => `<b>${a.name}</b>: ${a.signals[0].text}`)]];
-      return { lead: `${nowY} ${v.pillar.zh} is ${v.rating} ${RATE_ZH[v.rating]} for you. ${v.withLuck || ''}`, sec, dos, donts, more: 'yH' };
+      return { lead: `${nowY} (${v.pillar.zh}) is a ${v.rating} ${RATE_ZH[v.rating]} year for you. ${v.withLuck || ''}`, sec, dos, donts, more: 'yH' };
     }
     if (id === 'month') {
       const today = new Date().toISOString().slice(0, 10), ms = TM.monthExpectations(c, r, nowY).concat(TM.monthExpectations(c, r, nowY - 1));
       const m = ms.find(x => x.start <= today && today < x.end) || ms[0];
-      return { lead: `${m.pillar.zh} month (${m.start} to ${m.end}) is ${m.rating} ${RATE_ZH[m.rating]} for you. ${m.headline}`, sec: [['What it brings', [m.story]]], dos: m.dos, donts: m.donts, more: 'mH' };
+      return { lead: `This month (${m.pillar.zh}, ${fmtD(m.start)} to ${fmtD(m.end)}) is ${m.rating} ${RATE_ZH[m.rating]} for you. ${m.headline}`, sec: [['What it brings', [m.story]]], dos: m.dos, donts: m.donts, more: 'mH' };
     }
     if (id === 'strengths') {
       const top = Object.entries(gw.w).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]);
       const weak = excess.map(e => ROLE_DONT[role(e)]).concat(avoid.filter(e => !excess.includes(e)).slice(0, 1).map(e => ROLE_DONT[role(e)]));
       const blind = [pt.fit === 'broken' ? pt.note : '', S.leanStrong ? 'You can push on alone and forget to ask for input or rest.' : 'You can wait for support or approval when you could already act.'].filter(Boolean);
-      return { lead: `${pt.name} ${pt.zh}: ${pt.about}`, sec: [['Strengths', [firstS(plainOf(rs('personality')[0])), ...top.map(k => `${godName(k)}: ${capF(RL.GOD_TRAIT[k])}`)]], ['Weaknesses', weak.map(tend)], ['Blind spots', blind]], more: 'c-personality' };
+      return { lead: `${pt.name} ${pt.zh}: ${pt.about}`, sec: [['Strengths', [firstS(plainOf(rs('personality')[0])), ...top.map(k => `${godName(k)}: ${RL.GOD_TRAIT[k]}.`)]], ['Weaknesses', weak.map(tend)], ['Blind spots', blind]], more: 'c-personality' };
     }
     if (id === 'thrive') {
       return { lead: S.meaning, sec: [['What suits you', helpful.map(e => `<b>${EL(e)} ${EL_ZH[e]}</b>: ${capF(RL.USE[e].life)}`)], ['People and set-up', helpful.map(e => ROLE_DO[role(e)])]], dos: helpful.map(e => EL_DO[e]), donts: avoid.slice(0, 2).map(e => EL_DONT[e]), more: 'planH' };
@@ -12989,7 +12994,8 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
       const g = gw.groups, OWN = ['IW', 'HO', 'F', 'RW', 'SK'], ORG = ['DO', 'DR', 'DW', 'IR'];
       const biz = (g.Output || 0) + (g.Wealth || 0) + (S.leanStrong ? 1 : 0) + (OWN.includes(pt.god) ? 1.5 : 0), emp = (g.Officer || 0) + (g.Resource || 0) + (S.leanStrong ? 0 : 1) + (ORG.includes(pt.god) ? 1.5 : 0);
       const verdict = biz - emp > 1 ? 'Your own business or venture suits you best.' : emp - biz > 1 ? 'Employment inside a good organisation suits you best.' : 'A mix suits you: a secure role with a side business, or a business with a partner.';
-      const why = [`Output and Wealth stars (what you create and earn) weigh ${((g.Output || 0) + (g.Wealth || 0)).toFixed(1)}; Officer and Resource stars (structure and backing) weigh ${((g.Officer || 0) + (g.Resource || 0)).toFixed(1)}.`, `Your ${pt.name} ${pt.zh} leans ${OWN.includes(pt.god) ? 'towards independence' : ORG.includes(pt.god) ? 'towards structure and rank' : 'either way'}.`, S.leanStrong ? 'A strong Day Master can carry risk and responsibility.' : 'A Day Master that needs support does better with backing than going it alone.'];
+      const make = (g.Output || 0) + (g.Wealth || 0), keep = (g.Officer || 0) + (g.Resource || 0);
+      const why = [make - keep > 1 ? 'Your chart has clearly more stars for creating and earning (Output, Wealth) than for structure and backing (Officer, Resource).' : keep - make > 1 ? 'Your chart has clearly more stars for structure and backing (Officer, Resource) than for creating and earning (Output, Wealth).' : 'Stars for creating and earning (Output, Wealth) and for structure and backing (Officer, Resource) are about even in your chart.', `Your ${pt.name} ${pt.zh} leans ${OWN.includes(pt.god) ? 'towards independence' : ORG.includes(pt.god) ? 'towards structure and rank' : 'either way'}.`, S.leanStrong ? 'A strong Day Master can carry risk and responsibility.' : 'A Day Master that needs support does better with backing than going it alone.'];
       return { lead: verdict, sec: [['Why', why]], note: 'This weighing is the app\'s own; the stars it counts are classic.', more: 'c-work' };
     }
     if (id === 'wealth' || id === 'money') {
@@ -13006,16 +13012,16 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
       const kinds = b => RL.findInteractions([{ p: 'a', stem: 0, branch: day }, { p: 'b', stem: 1, branch: b }]).filter(x => x.part === 'branch').map(x => x.kind);
       const goodA = B.map((x, b) => b).filter(b => b !== day && kinds(b).some(k => k === 'combo' || k === 'half')).map(b => `${B[b].animal} ${B[b].zh}`);
       const hardA = B.map((x, b) => b).filter(b => kinds(b).includes('clash')).map(b => `${B[b].animal} ${B[b].zh}`);
-      if (id === 'partner') return { lead: firstS(plainOf(lr[0])), sec: [['Your partner star', lr.slice(1, 2).map(x => firstS(plainOf(x)))], ['Signs that tend to fit', [`Day branch animals that bond with yours: ${goodA.join(', ')}.`, `A partner whose chart is rich in ${elList(helpful)} tends to feel supportive.`]], ['Signs that take more work', [`Day branch animals that clash with yours: ${hardA.join(', ')}.`]]], note: 'Compare two charts for a full reading.', more: 'c-love' };
-      const pats = lr.slice(1).map(x => firstS(plainOf(x)));
+      if (id === 'partner') return { lead: firstS(plainOf(lr[0])), sec: [['Your partner star', lr.slice(1, 2).map(x => plainOf(x))], ['Signs that tend to fit', [`A partner whose day branch is ${goodA.join(' or ')}: their day bonds with yours.`, `A partner whose chart has plenty of ${helpful.map(e => `${EL(e)} ${EL_ZH[e]}`).join(' and ')}, the elements that help you.`]], ['Signs that take more work', [`A partner whose day branch is ${hardA.join(' or ')}: their day clashes with yours.`]]], note: 'Compare two charts for a full reading.', more: 'c-love' };
+      const pats = lr.slice(1).map(x => plainOf(x));
       return { lead: firstS(plainOf(lr[0])), sec: [['Patterns', pats.length ? pats : ['No strong pattern stands out in the chart.']]], dos: ['Talk about money, family and plans early', S.leanStrong ? 'Leave room for your partner to lead sometimes' : 'Say what you need instead of waiting'], donts: [S.leanStrong ? 'Don\'t win every argument' : 'Don\'t keep the peace at your own cost'], more: 'c-love' };
     }
     if (id === 'decade' || id === 'priority') {
       const L = c.luck.pillars, i = L.indexOf(r.current.luck);
       if (i < 0) return { lead: 'Your first 10-year luck has not started yet.', sec: [], more: 'tlH' };
       const st = RL.luckStory(c, S, i), half = nowY < st.y0 + 5 ? 0 : 1, h = st.halves[half];
-      if (id === 'decade') return { lead: `${L[i].zh} (${st.y0}–${st.y0 + 10}) is ${st.rating} ${RATE_ZH[st.rating]} for you. You are in its ${half ? 'second' : 'first'} half: ${h.god}.`, sec: [['What it brings now', [h.text, h.fit]], ['Your energy', [st.stage]], ['How it meets your chart', st.links.map(x => x.plain).slice(0, 3)]], dos: st.dos, donts: st.donts, more: 'tlH' };
-      return { lead: `Age ${nowY - +p.date.slice(0, 4)}: ${h.text}`, sec: [['Put first', [st.dos[0], ...helpful.slice(0, 2).map(e => ROLE_DO[role(e)])]], ['Leave for later', st.donts]], note: st.next ? `From ${st.next.from} the next decade looks ${st.next.rating}.` : '', more: 'tlH' };
+      if (id === 'decade') return { lead: `${L[i].zh} (${st.y0}–${st.y0 + 10}) is ${st.rating} ${RATE_ZH[st.rating]} for you. You are in its ${half ? 'second' : 'first'} half, led by ${h.god}.`, sec: [['What it brings now', [h.text, h.fit]], ['Your energy', [capF(st.stage.replace(/^[^:：]*[:：]\s*/, ''))]], ['How it meets your chart', st.links.map(x => x.plain).slice(0, 3)]], dos: st.dos, donts: st.donts, more: 'tlH' };
+      return { lead: `At ${nowY - +p.date.slice(0, 4)}, this part of your life is about ${h.text.charAt(0).toLowerCase() + h.text.slice(1)}`, sec: [['Put first', [st.dos[0], ...helpful.slice(0, 2).map(e => ROLE_DO[role(e)])]], ['Avoid for now', st.donts]], note: st.next ? `From ${st.next.from} the next decade looks ${st.next.rating}.` : '', more: 'tlH' };
     }
     if (id === 'recurring') {
       const bad = r.interactions.filter(x => x.tone === 'bad').slice(0, 2).map(x => firstS(x.plain || x.text));
@@ -13769,7 +13775,7 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#modeSeg [data-mode]'); if (!b || !window.setMode) return; tick(); window.setMode(b.dataset.mode); drawModes(); });
   // "Last updated": the time GitHub Pages published this file (its Last-Modified), else the time it was built
   (() => { let t = new Date(document.lastModified); const now = Date.now();
-    if (location.protocol !== 'https:' || isNaN(t) || Math.abs(now - t) < 60000) t = new Date(1792427031825);
+    if (location.protocol !== 'https:' || isNaN(t) || Math.abs(now - t) < 60000) t = new Date(1792462540388);
     const p = n => String(n).padStart(2, '0'), M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     $('updated').textContent = window.BAZI_LANG === 'zh' ? `最后更新：${t.getFullYear()}年${t.getMonth() + 1}月${t.getDate()}日 ${p(t.getHours())}:${p(t.getMinutes())}`
       : `Last updated on ${p(t.getHours())}:${p(t.getMinutes())} ${t.getDate()} ${M[t.getMonth()]} ${t.getFullYear()}`; })();
@@ -17388,6 +17394,7 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
     window.scrollTo({ top: q.getBoundingClientRect().top + scrollY - off, behavior: reduced ? 'auto' : 'smooth' }); }
   const capF = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
   const plainOf = x => x.plain || x.text;
+  const fmtD = d => { const t = new Date(d + 'T00:00:00'); return window.BAZI_LANG === 'zh' ? `${t.getMonth() + 1}月${t.getDate()}日` : `${t.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][t.getMonth()]}`; };
   // a "Don't …" tip read as a tendency to watch
   const tend = t => t.replace(/^Don't /, 'Tendency to ').replace(/^不要/, '容易').replace(/也不要/g, '也容易');
   const firstS = t => (String(t).match(/^.*?(?:\.(?=\s|$)|。)/) || [t])[0];
@@ -17405,35 +17412,36 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
       const hardA = a => !a.welcome && (a.loss || ['health', 'family'].includes(a.key) || /^(clash|harm|punish|tkdc|own|challenging|void)/.test(a.signals[0].id));
       const good = areas.filter(a => !hardA(a)), hard = areas.filter(hardA);
       const flagIds = v.flags.map(f => f.id);
-      const dos = uniq([`利于${TM.GOOD_FOR[v.sg][0]}`, capF(TM.GOOD_FOR[v.sg][1]), ...flagIds.map(f => TM.DODONT[f] && TM.DODONT[f][0]), v.rating === 'supportive' ? '开始一直计划的事' : v.rating === 'challenging' ? '计划要小，多储蓄，把手头的事做完' : '']).slice(0, 5);
+      const dos = uniq([`适合${TM.GOOD_FOR[v.sg][0]}`, `也适合${TM.GOOD_FOR[v.sg][1]}`, ...flagIds.map(f => TM.DODONT[f] && TM.DODONT[f][0]), v.rating === 'supportive' ? '开始一直计划的事' : v.rating === 'challenging' ? '计划要小，多储蓄，把手头的事做完' : '']).slice(0, 5);
       const donts = uniq([TM.DONT_GOD[v.sg], ...flagIds.map(f => TM.DODONT[f] && TM.DODONT[f][1]), v.rating === 'challenging' ? '今年不要把大量资源押在一次大冒险上' : '']).slice(0, 4);
       const sec = id === 'year'
         ? [['今年的指向', areas.map(a => `<b>${a.name}</b>（${({ likely: '较可能', possible: '可能' })[a.level] || a.level}）：${a.signals[0].text}`)]]
-        : [['机会', good.map(a => `<b>${a.name}</b>: ${a.signals[0].text}`)], ['挑战', hard.map(a => `<b>${a.name}</b>: ${a.signals[0].text}`)]];
-      return { lead: `${nowY}年${v.pillar.zh}对你来说是${RATE_ZH[v.rating]}。${v.withLuck || ''}`, sec, dos, donts, more: 'yH' };
+        : [['机会', good.map(a => `<b>${a.name}</b>：${a.signals[0].text}`)], ['挑战', hard.map(a => `<b>${a.name}</b>：${a.signals[0].text}`)]];
+      return { lead: `${nowY}年（${v.pillar.zh}）对你来说是${RATE_ZH[v.rating]}年。${v.withLuck || ''}`, sec, dos, donts, more: 'yH' };
     }
     if (id === 'month') {
       const today = new Date().toISOString().slice(0, 10), ms = TM.monthExpectations(c, r, nowY).concat(TM.monthExpectations(c, r, nowY - 1));
       const m = ms.find(x => x.start <= today && today < x.end) || ms[0];
-      return { lead: `${m.pillar.zh}月（${m.start}至${m.end}）对你来说是${RATE_ZH[m.rating]}。${m.headline}`, sec: [['这个月带来什么', [m.story]]], dos: m.dos, donts: m.donts, more: 'mH' };
+      return { lead: `本月（${m.pillar.zh}，${fmtD(m.start)}至${fmtD(m.end)}）对你来说是${RATE_ZH[m.rating]}。${m.headline}`, sec: [['这个月带来什么', [m.story]]], dos: m.dos, donts: m.donts, more: 'mH' };
     }
     if (id === 'strengths') {
       const top = Object.entries(gw.w).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]);
       const weak = excess.map(e => ROLE_DONT[role(e)]).concat(avoid.filter(e => !excess.includes(e)).slice(0, 1).map(e => ROLE_DONT[role(e)]));
       const blind = [pt.fit === 'broken' ? pt.note : '', S.leanStrong ? '你可能一个人硬撑，忘了听取意见或休息。' : '你可能在本可行动时还在等支持或认可。'].filter(Boolean);
-      return { lead: `${pt.zh}：${pt.about}`, sec: [['优点', [firstS(plainOf(rs('personality')[0])), ...top.map(k => `${godName(k)}: ${capF(RL.GOD_TRAIT[k])}`)]], ['弱点', weak.map(tend)], ['盲点', blind]], more: 'c-personality' };
+      return { lead: `${pt.zh}：${pt.about}`, sec: [['优点', [firstS(plainOf(rs('personality')[0])), ...top.map(k => `${godName(k)}：${RL.GOD_TRAIT[k]}。`)]], ['弱点', weak.map(tend)], ['盲点', blind]], more: 'c-personality' };
     }
     if (id === 'thrive') {
-      return { lead: S.meaning, sec: [['适合你的', helpful.map(e => `<b>${ELT(e)}</b>: ${capF(RL.USE[e].life)}`)], ['人与环境', helpful.map(e => ROLE_DO[role(e)])]], dos: helpful.map(e => EL_DO[e]), donts: avoid.slice(0, 2).map(e => EL_DONT[e]), more: 'planH' };
+      return { lead: S.meaning, sec: [['适合你的', helpful.map(e => `<b>${ELT(e)}</b>：${capF(RL.USE[e].life)}`)], ['人与环境', helpful.map(e => ROLE_DO[role(e)])]], dos: helpful.map(e => EL_DO[e]), donts: avoid.slice(0, 2).map(e => EL_DONT[e]), more: 'planH' };
     }
     if (id === 'career') {
-      return { lead: `你的${pt.zh}适合${pt.work}。`, sec: [['命盘对工作的提示', rs('work').slice(1, 4).map(x => firstS(plainOf(x)))], ['带来喜用五行的领域', helpful.map(e => `<b>${ELT(e)}</b>: ${capF(RL.USE[e].work)}`)]], more: 'c-work' };
+      return { lead: `你的${pt.zh}适合${pt.work}。`, sec: [['命盘对工作的提示', rs('work').slice(1, 4).map(x => firstS(plainOf(x)))], ['带来喜用五行的领域', helpful.map(e => `<b>${ELT(e)}</b>：${capF(RL.USE[e].work)}`)]], more: 'c-work' };
     }
     if (id === 'employ') {
       const g = gw.groups, OWN = ['IW', 'HO', 'F', 'RW', 'SK'], ORG = ['DO', 'DR', 'DW', 'IR'];
       const biz = (g.Output || 0) + (g.Wealth || 0) + (S.leanStrong ? 1 : 0) + (OWN.includes(pt.god) ? 1.5 : 0), emp = (g.Officer || 0) + (g.Resource || 0) + (S.leanStrong ? 0 : 1) + (ORG.includes(pt.god) ? 1.5 : 0);
       const verdict = biz - emp > 1 ? '最适合自己创业或做生意。' : emp - biz > 1 ? '最适合在好的机构里打工。' : '两者结合最适合你：稳定工作加副业，或与人合伙做生意。';
-      const why = [`食伤和财星（你创造和赚取的）占${((g.Output || 0) + (g.Wealth || 0)).toFixed(1)}；官杀和印星（规矩和靠山）占${((g.Officer || 0) + (g.Resource || 0)).toFixed(1)}。`, `你的${pt.zh}${OWN.includes(pt.god) ? '偏向独立' : ORG.includes(pt.god) ? '偏向制度和职位' : '两边都可以'}。`, S.leanStrong ? '日主强，扛得起风险和责任。' : '日主需要帮扶，有靠山比单打独斗更好。'];
+      const make = (g.Output || 0) + (g.Wealth || 0), keep = (g.Officer || 0) + (g.Resource || 0);
+      const why = [make - keep > 1 ? '你命盘里创造和赚取的星（食伤、财）明显多于规矩和靠山的星（官杀、印）。' : keep - make > 1 ? '你命盘里规矩和靠山的星（官杀、印）明显多于创造和赚取的星（食伤、财）。' : '你命盘里创造和赚取的星（食伤、财）与规矩和靠山的星（官杀、印）差不多。', `你的${pt.zh}${OWN.includes(pt.god) ? '偏向独立' : ORG.includes(pt.god) ? '偏向制度和职位' : '两边都可以'}。`, S.leanStrong ? '日主强，扛得起风险和责任。' : '日主需要帮扶，有靠山比单打独斗更好。'];
       return { lead: verdict, sec: [['原因', why]], note: '这个比较方法是本应用自定的；所数的星是传统的。', more: 'c-work' };
     }
     if (id === 'wealth' || id === 'money') {
@@ -17450,16 +17458,16 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
       const kinds = b => RL.findInteractions([{ p: 'a', stem: 0, branch: day }, { p: 'b', stem: 1, branch: b }]).filter(x => x.part === 'branch').map(x => x.kind);
       const goodA = B.map((x, b) => b).filter(b => b !== day && kinds(b).some(k => k === 'combo' || k === 'half')).map(b => `${B[b].zh}`);
       const hardA = B.map((x, b) => b).filter(b => kinds(b).includes('clash')).map(b => `${B[b].zh}`);
-      if (id === 'partner') return { lead: firstS(plainOf(lr[0])), sec: [['你的配偶星', lr.slice(1, 2).map(x => firstS(plainOf(x)))], ['容易合拍的迹象', [`与你日支相合的生肖：${goodA.join('、')}。`, `命盘里${elList(helpful)}多的伴侣，通常让你觉得被支持。`]], ['需要多磨合的迹象', [`与你日支相冲的生肖：${hardA.join('、')}。`]]], note: '用合盘比较两人的命盘，看完整解读。', more: 'c-love' };
-      const pats = lr.slice(1).map(x => firstS(plainOf(x)));
+      if (id === 'partner') return { lead: firstS(plainOf(lr[0])), sec: [['你的配偶星', lr.slice(1, 2).map(x => plainOf(x))], ['容易合拍的迹象', [`日支为${goodA.join('、')}的伴侣：对方日支与你相合。`, `命盘里${helpful.map(e => `${EL_ZH[e]}`).join('和')}多的伴侣，这些是对你有帮助的五行。`]], ['需要多磨合的迹象', [`日支为${hardA.join('、')}的伴侣：对方日支与你相冲。`]]], note: '用合盘比较两人的命盘，看完整解读。', more: 'c-love' };
+      const pats = lr.slice(1).map(x => plainOf(x));
       return { lead: firstS(plainOf(lr[0])), sec: [['模式', pats.length ? pats : ['命盘中没有特别突出的模式。']]], dos: ['早点谈钱、家庭和规划', S.leanStrong ? '有时让伴侣来主导' : '说出你的需要，不要干等'], donts: [S.leanStrong ? '不要每次争论都要赢' : '不要委屈自己去维持和平'], more: 'c-love' };
     }
     if (id === 'decade' || id === 'priority') {
       const L = c.luck.pillars, i = L.indexOf(r.current.luck);
       if (i < 0) return { lead: '你的第一步大运还没开始。', sec: [], more: 'tlH' };
       const st = RL.luckStory(c, S, i), half = nowY < st.y0 + 5 ? 0 : 1, h = st.halves[half];
-      if (id === 'decade') return { lead: `${L[i].zh}大运（${st.y0}–${st.y0 + 10}）对你来说是${RATE_ZH[st.rating]}。你正处于它的${half ? '后' : '前'}五年：${h.god}。`, sec: [['现在带来什么', [h.text, h.fit]], ['你的能量', [st.stage]], ['与命局的互动', st.links.map(x => x.plain).slice(0, 3)]], dos: st.dos, donts: st.donts, more: 'tlH' };
-      return { lead: `${nowY - +p.date.slice(0, 4)}岁：${h.text}`, sec: [['优先做', [st.dos[0], ...helpful.slice(0, 2).map(e => ROLE_DO[role(e)])]], ['可以放后', st.donts]], note: st.next ? `从${st.next.from}年起，下一步大运看起来${RATE_ZH[st.next.rating]}。` : '', more: 'tlH' };
+      if (id === 'decade') return { lead: `${L[i].zh}大运（${st.y0}–${st.y0 + 10}）对你来说是${RATE_ZH[st.rating]}。你正处于它的${half ? '后' : '前'}五年，由${h.god}主导。`, sec: [['现在带来什么', [h.text, h.fit]], ['你的能量', [capF(st.stage.replace(/^[^:：]*[:：]\s*/, ''))]], ['与命局的互动', st.links.map(x => x.plain).slice(0, 3)]], dos: st.dos, donts: st.donts, more: 'tlH' };
+      return { lead: `${nowY - +p.date.slice(0, 4)}岁这个阶段的重点是：${h.text.charAt(0).toLowerCase() + h.text.slice(1)}`, sec: [['优先做', [st.dos[0], ...helpful.slice(0, 2).map(e => ROLE_DO[role(e)])]], ['暂时避免', st.donts]], note: st.next ? `从${st.next.from}年起，下一步大运看起来${RATE_ZH[st.next.rating]}。` : '', more: 'tlH' };
     }
     if (id === 'recurring') {
       const bad = r.interactions.filter(x => x.tone === 'bad').slice(0, 2).map(x => firstS(x.plain || x.text));
@@ -18213,7 +18221,7 @@ li.lowfit .mfit .fstat, .mfit .fstat.hi { display: inline-flex; }
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#modeSeg [data-mode]'); if (!b || !window.setMode) return; tick(); window.setMode(b.dataset.mode); drawModes(); });
   // "Last updated": the time GitHub Pages published this file (its Last-Modified), else the time it was built
   (() => { let t = new Date(document.lastModified); const now = Date.now();
-    if (location.protocol !== 'https:' || isNaN(t) || Math.abs(now - t) < 60000) t = new Date(1792427031825);
+    if (location.protocol !== 'https:' || isNaN(t) || Math.abs(now - t) < 60000) t = new Date(1792462540388);
     const p = n => String(n).padStart(2, '0'), M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     $('updated').textContent = window.BAZI_LANG === 'zh' ? `最后更新：${t.getFullYear()}年${t.getMonth() + 1}月${t.getDate()}日 ${p(t.getHours())}:${p(t.getMinutes())}`
       : `Last updated on ${p(t.getHours())}:${p(t.getMinutes())} ${t.getDate()} ${M[t.getMonth()]} ${t.getFullYear()}`; })();
