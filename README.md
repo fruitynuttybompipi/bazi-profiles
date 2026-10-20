@@ -7,7 +7,7 @@ This repo holds **code only**. It contains no personal data. Profiles live in a 
 ## Put the app on GitHub Pages
 
 1. Create a repo for the code, for example `bazi-profiles`. Free GitHub Pages needs it to be public; that is fine, because no profiles are stored here.
-2. Upload these files to the repo root: `index.html`, `sw.js`, `manifest.webmanifest`, the four icon PNGs (`icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`), this README, the licence file and `BaZi-Profiles-Guide.pdf`. Keep the source in a `src/` folder if you like; Pages ignores it.
+2. Upload these files to the repo root: `index.html` (Banana English + 中文, and English), `zh.html` (the 中文 version, loaded only when chosen), `sw.js`, `manifest.webmanifest`, the four icon PNGs (`icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`), this README, the licence file and `BaZi-Profiles-Guide.pdf`. Keep the source in a `src/` folder if you like; Pages ignores it.
 3. Repo **Settings → Pages → Build and deployment**: Source **Deploy from a branch**, Branch **main**, folder **/ (root)**. Save.
 4. After a minute the app is at `https://<your-username>.github.io/bazi-profiles/`.
 
@@ -18,7 +18,7 @@ Open the Pages address on your phone, then:
 - **iPhone / iPad (Safari):** Share → **Add to Home Screen**.
 - **Android (Chrome):** ⋮ menu → **Install app**, or use the **Install app** button in Settings.
 
-The installed app opens full screen and works offline. GitHub sync catches up when you are back online. After you upload a new `index.html`, the app picks it up the next time it opens online.
+The installed app opens full screen and works offline. GitHub sync catches up when you are back online. After you upload a new `index.html`, upload the matching `zh.html` and `sw.js` from the same build too; the app picks them up the next time it opens online.
 
 ## Sync your profiles across devices
 
@@ -44,6 +44,14 @@ Per person: nickname (not a full name), birth date, birth time or "unknown", gen
 
 **Settings → Backup** exports a dated `bazi-profiles-YYYY-MM-DD.json`, and imports one with **Merge** or **Replace**. **Settings → Delete all data** removes everything on this device, or everywhere including the synced file.
 
+## How the calculation is checked
+
+The source (`src/`) has test suites that run on every change, plus an optional cross-check against an independent engine. Latest results:
+
+- 3,000 random births compared with lunar-javascript and tyme4ts: pillars, hidden stems, ten gods and luck pillars all match.
+- 2,000 random births in 8 time zones compared with [Stillness Dao's bazi-engine](https://github.com/David88666/bazi-engine) (MIT), which works from solar positions independently: pillars 2,000 / 2,000 (and 409 / 409 late-Rat-hour births with the same-day rule), first luck pillar, Nayin, fetal origin, void branches and life stages all 2,000 / 2,000.
+- Luck **start age** matched bazi-engine in only 901 / 2,000 births, usually by about ten years. Both use the same 3-days-to-1-year rule, and this app agrees with lunar-javascript and tyme4ts, so the gap looks like bazi-engine picking a different solar term in some cases.
+
 ## Credits and licence
 
-Calendar maths (solar terms, the sexagenary day cycle) comes from [lunar-javascript](https://github.com/6tail/lunar-javascript) by 6tail, MIT licence (see `LICENSE-lunar-javascript.txt`), bundled inside `index.html`. Reading rules and wording are original to this project. Compatibility scores use the author's own weighting and are a guide, not a verdict.
+Pillars are cross-checked against [bazi-engine](https://github.com/David88666/bazi-engine) by Stillness Dao (MIT); no code from it is bundled. Calendar maths (solar terms, the sexagenary day cycle) comes from [lunar-javascript](https://github.com/6tail/lunar-javascript) by 6tail, MIT licence (see `LICENSE-lunar-javascript.txt`), bundled inside `index.html`. Reading rules and wording are original to this project. Compatibility scores use the author's own weighting and are a guide, not a verdict.
