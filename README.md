@@ -4,13 +4,6 @@ A single-page BaZi (Four Pillars) tool: one chart with plain-English readings, a
 
 This repo holds **code only**. It contains no personal data. Profiles live in a separate **private** repo and sync through a token that each device keeps in its own browser.
 
-## Put the app on GitHub Pages
-
-1. Create a repo for the code, for example `bazi-profiles`. Free GitHub Pages needs it to be public; that is fine, because no profiles are stored here.
-2. Upload these files to the repo root: `index.html` (Banana English + 中文, and English), `zh.html` (the 中文 version, loaded only when chosen), `sw.js`, `manifest.webmanifest`, the four icon PNGs (`icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`), this README, the licence file and `BaZi-Profiles-Guide.pdf`. Keep the source in a `src/` folder if you like; Pages ignores it.
-3. Repo **Settings → Pages → Build and deployment**: Source **Deploy from a branch**, Branch **main**, folder **/ (root)**. Save.
-4. After a minute the app is at `https://<your-username>.github.io/bazi-profiles/`.
-
 ## Install it like an app
 
 Open the Pages address on your phone, then:
